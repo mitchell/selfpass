@@ -1,8 +1,9 @@
 package types
 
-import "time"
+import (
+	"time"
+)
 
-// Credential TODO
 type Credential struct {
 	Metadata
 	Username string
@@ -10,7 +11,6 @@ type Credential struct {
 	Password string
 }
 
-// CredentialInput TODO
 type CredentialInput struct {
 	MetadataInput
 	Username string
@@ -18,17 +18,15 @@ type CredentialInput struct {
 	Password string
 }
 
-// Metadata TODO
 type Metadata struct {
-	ID         string
+	ID         string // primary key
+	SourceHost string // sort key
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	Primary    string
-	SourceHost string
 	LoginURL   string
 }
 
-// MetadataInput TODO
 type MetadataInput struct {
 	Primary    string
 	SourceHost string

@@ -9,7 +9,6 @@ import (
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
-// NewDynamoTable TODO
 func NewDynamoTable(name string) DynamoTable {
 	cfg, err := external.LoadDefaultAWSConfig()
 	if err != nil {
@@ -21,22 +20,20 @@ func NewDynamoTable(name string) DynamoTable {
 	}
 }
 
-// DynamoTable TODO
 type DynamoTable struct {
 	name string
 	svc  *dynamodb.DynamoDB
 }
 
-// GetAllMetadata TODO
-func (t DynamoTable) GetAllMetadata(ctx context.Context, sourceService string, errch chan<- error) (output <-chan types.Metadata) {
+func (t DynamoTable) GetAllMetadata(ctx context.Context, sourceHost string, errch chan<- error) (output <-chan types.Metadata) {
 	mdch := make(chan types.Metadata, 1)
 	in := &dynamodb.ScanInput{TableName: &t.name}
 
-	if sourceService != "" {
+	if sourceHost != "" {
 		filterExpr := "SourceHost = :sh"
 		in.FilterExpression = &filterExpr
 		in.ExpressionAttributeValues = map[string]dynamodb.AttributeValue{
-			":sh": {S: &sourceService},
+			":sh": {S: &sourceHost},
 		}
 	}
 
@@ -68,7 +65,6 @@ func (t DynamoTable) GetAllMetadata(ctx context.Context, sourceService string, e
 	return mdch
 }
 
-// Get TODO
 func (t DynamoTable) Get(ctx context.Context, id string) (output types.Credential, err error) {
 	req := t.svc.GetItemRequest(&dynamodb.GetItemInput{
 		TableName: &t.name,
@@ -86,7 +82,6 @@ func (t DynamoTable) Get(ctx context.Context, id string) (output types.Credentia
 	return output, err
 }
 
-// Put TODO
 func (t DynamoTable) Put(ctx context.Context, c types.Credential) (err error) {
 	item, err := dynamodbattribute.MarshalMap(c)
 	if err != nil {
@@ -104,7 +99,6 @@ func (t DynamoTable) Put(ctx context.Context, c types.Credential) (err error) {
 	return err
 }
 
-// Delete TODO
 func (t DynamoTable) Delete(ctx context.Context, id string) (err error) {
 	req := t.svc.DeleteItemRequest(&dynamodb.DeleteItemInput{
 		TableName: &t.name,

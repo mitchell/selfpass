@@ -2,7 +2,6 @@ package transport
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/go-kit/kit/log"
@@ -15,13 +14,18 @@ import (
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
-// NewGRPCServer TODO
 func NewGRPCServer(svc types.Service, logger log.Logger) GRPCServer {
 	return GRPCServer{
 		getAllMetadata: grpc.NewServer(
 			endpoints.MakeGetAllMetadataEndpoint(svc),
 			decodeGetAllMetadataRequest,
 			encodeMetadataStreamResponse,
+			grpc.ServerErrorLogger(logger),
+		),
+		get: grpc.NewServer(
+			endpoints.MakeGetEndpoint(svc),
+			decodeIdRequest,
+			encodeCredentialResponse,
 			grpc.ServerErrorLogger(logger),
 		),
 		create: grpc.NewServer(
@@ -39,25 +43,29 @@ func NewGRPCServer(svc types.Service, logger log.Logger) GRPCServer {
 		delete: grpc.NewServer(
 			endpoints.MakeDeleteEndpoint(svc),
 			decodeIdRequest,
-			noOpEncode,
+			noOp,
+			grpc.ServerErrorLogger(logger),
+		),
+		dump: grpc.NewServer(
+			endpoints.MakeDumpEndpoint(svc),
+			noOp,
+			encodeDumpResponse,
 			grpc.ServerErrorLogger(logger),
 		),
 	}
 }
 
-// GRPCServer TODO
 type GRPCServer struct {
 	getAllMetadata *grpc.Server
+	get            *grpc.Server
 	create         *grpc.Server
 	update         *grpc.Server
 	delete         *grpc.Server
+	dump           *grpc.Server
 }
 
-// GetAllMetadata TODO
 func (s GRPCServer) GetAllMetadata(r *protobuf.GetAllMetadataRequest, srv protobuf.CredentialService_GetAllMetadataServer) (err error) {
-	defer func() {
-		err = handlerGRPCError(err)
-	}()
+	defer func() { err = handlerGRPCError(err) }()
 
 	var i interface{}
 	ctx := srv.Context()
@@ -80,7 +88,6 @@ receiveLoop:
 			if !ok {
 				break receiveLoop
 			}
-			fmt.Println(md)
 			if err = srv.Send(&md); err != nil {
 				break receiveLoop
 			}
@@ -90,14 +97,8 @@ receiveLoop:
 	return err
 }
 
-// Get TODO
-func (s GRPCServer) Get(context.Context, *protobuf.IdRequest) (*protobuf.Credential, error) {
-	panic("implement me")
-}
-
-// Create TODO
-func (s GRPCServer) Create(ctx context.Context, ci *protobuf.CredentialRequest) (*protobuf.Credential, error) {
-	ctx, i, err := s.create.ServeGRPC(ctx, *ci)
+func (s GRPCServer) Get(ctx context.Context, r *protobuf.IdRequest) (*protobuf.Credential, error) {
+	ctx, i, err := s.get.ServeGRPC(ctx, *r)
 	if err != nil {
 		err = handlerGRPCError(err)
 		return nil, err
@@ -108,7 +109,18 @@ func (s GRPCServer) Create(ctx context.Context, ci *protobuf.CredentialRequest) 
 	return c, nil
 }
 
-// Update TODO
+func (s GRPCServer) Create(ctx context.Context, r *protobuf.CredentialRequest) (*protobuf.Credential, error) {
+	ctx, i, err := s.create.ServeGRPC(ctx, *r)
+	if err != nil {
+		err = handlerGRPCError(err)
+		return nil, err
+	}
+
+	c := &protobuf.Credential{}
+	*c = i.(protobuf.Credential)
+	return c, nil
+}
+
 func (s GRPCServer) Update(ctx context.Context, r *protobuf.UpdateRequest) (*protobuf.Credential, error) {
 	ctx, i, err := s.update.ServeGRPC(ctx, *r)
 	if err != nil {
@@ -121,14 +133,26 @@ func (s GRPCServer) Update(ctx context.Context, r *protobuf.UpdateRequest) (*pro
 	return c, nil
 }
 
-// Delete TODO
 func (s GRPCServer) Delete(ctx context.Context, r *protobuf.IdRequest) (*protobuf.DeleteResponse, error) {
 	ctx, _, err := s.delete.ServeGRPC(ctx, *r)
 	if err != nil {
+		err = handlerGRPCError(err)
 		return nil, err
 	}
 
 	return &protobuf.DeleteResponse{Success: true}, nil
+}
+
+func (s GRPCServer) Dump(ctx context.Context, r *protobuf.EmptyRequest) (*protobuf.DumpResponse, error) {
+	ctx, i, err := s.dump.ServeGRPC(ctx, *r)
+	if err != nil {
+		err = handlerGRPCError(err)
+		return nil, err
+	}
+
+	res := &protobuf.DumpResponse{}
+	*res = i.(protobuf.DumpResponse)
+	return res, nil
 }
 
 func handlerGRPCError(err error) error {

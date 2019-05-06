@@ -16,6 +16,13 @@ func decodeGetAllMetadataRequest(ctx context.Context, request interface{}) (inte
 	}, nil
 }
 
+func encodeDumpResponse(ctx context.Context, response interface{}) (interface{}, error) {
+	r := response.(endpoints.DumpResponse)
+	return protobuf.DumpResponse{
+		Contents: r.Contents,
+	}, nil
+}
+
 func encodeMetadataStreamResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	r := response.(endpoints.MetadataStream)
 	pbmdch := make(chan protobuf.Metadata, 1)
@@ -122,6 +129,6 @@ func decodeIdRequest(ctx context.Context, request interface{}) (interface{}, err
 	}, nil
 }
 
-func noOpEncode(ctx context.Context, request interface{}) (interface{}, error) {
+func noOp(ctx context.Context, request interface{}) (interface{}, error) {
 	return nil, nil
 }

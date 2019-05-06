@@ -7,7 +7,27 @@ import (
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
-// MakeGetAllMetadataEndpoint TODO
+func MakeCreateEndpoint(svc types.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		r := request.(types.CredentialInput)
+		return svc.Create(ctx, r)
+	}
+}
+
+func MakeDeleteEndpoint(svc types.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		r := request.(IDRequest)
+		return nil, svc.Delete(ctx, r.ID)
+	}
+}
+
+func MakeGetEndpoint(svc types.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		r := request.(IDRequest)
+		return svc.Get(ctx, r.ID)
+	}
+}
+
 func MakeGetAllMetadataEndpoint(svc types.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		r := request.(GetAllMetadataRequest)
@@ -21,15 +41,6 @@ func MakeGetAllMetadataEndpoint(svc types.Service) endpoint.Endpoint {
 	}
 }
 
-// MakeCreateEndpoint TODO
-func MakeCreateEndpoint(svc types.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		r := request.(types.CredentialInput)
-		return svc.Create(ctx, r)
-	}
-}
-
-// MakeUpdateEndpoint TODO
 func MakeUpdateEndpoint(svc types.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		r := request.(UpdateRequest)
@@ -37,30 +48,30 @@ func MakeUpdateEndpoint(svc types.Service) endpoint.Endpoint {
 	}
 }
 
-func MakeDeleteEndpoint(svc types.Service) endpoint.Endpoint {
+func MakeDumpEndpoint(svc types.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		r := request.(IDRequest)
-		return nil, svc.Delete(ctx, r.ID)
+		contents, err := svc.DumpDB(ctx)
+		return DumpResponse{Contents: contents}, err
 	}
 }
 
-// IDRequest TODO
+type DumpResponse struct {
+	Contents []byte
+}
+
 type IDRequest struct {
 	ID string
 }
 
-// GetAllMetadataRequest TODO
 type GetAllMetadataRequest struct {
 	SourceHost string
 }
 
-// MetadataStream TODO
 type MetadataStream struct {
 	Metadata <-chan types.Metadata
 	Errors   chan error
 }
 
-// UpdateRequest TODO
 type UpdateRequest struct {
 	ID         string
 	Credential types.CredentialInput

@@ -2,45 +2,42 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
-// NewCredentials TODO
 func NewCredentials(repo types.CredentialRepo) Credentials {
 	return Credentials{
 		repo: repo,
 	}
 }
 
-// Credentials TODO
 type Credentials struct {
 	repo types.CredentialRepo
 }
 
-// GetAllMetadata TODO
-func (svc Credentials) GetAllMetadata(ctx context.Context, sourceService string) (output <-chan types.Metadata, errch chan error) {
+func (svc Credentials) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {
 	errch = make(chan error, 1)
-	output = svc.repo.GetAllMetadata(ctx, sourceService, errch)
+	output = svc.repo.GetAllMetadata(ctx, sourceHost, errch)
 	return output, errch
 }
 
-// Get TODO
 func (svc Credentials) Get(ctx context.Context, id string) (output types.Credential, err error) {
-	return svc.repo.Get(nil, id)
+	if id == "" {
+		return output, fmt.Errorf("%s must specify an id", types.InvalidArgument)
+	}
+	return svc.repo.Get(ctx, id)
 }
 
-// Create TODO
 func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (output types.Credential, err error) {
-	if err = validateCreate(ci); err != nil {
+	if err = validateCredentialInput(ci); err != nil {
 		return output, err
 	}
 
 	var c types.Credential
-
 	c.ID = "cred-" + uuid.New().String()
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
@@ -56,12 +53,26 @@ func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (ou
 	return c, err
 }
 
-func validateCreate(c types.CredentialInput) (err error) {
+func validateCredentialInput(c types.CredentialInput) (err error) {
+	switch {
+	case c.SourceHost == "":
+		return fmt.Errorf("%s must specify source host", types.InvalidArgument)
+	case c.Password == "":
+		return fmt.Errorf("%s must specify password", types.InvalidArgument)
+	}
+
 	return err
 }
 
-// Update TODO
 func (svc Credentials) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
+	if err = validateCredentialInput(ci); err != nil {
+		return output, err
+	}
+
+	if id == "" {
+		return output, fmt.Errorf("%s must specify an id", types.InvalidArgument)
+	}
+
 	c, err := svc.repo.Get(ctx, id)
 	if err != nil {
 		return output, err
@@ -78,7 +89,13 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 	return c, svc.repo.Put(ctx, c)
 }
 
-// Delete TODO
 func (svc Credentials) Delete(ctx context.Context, id string) (err error) {
-	return svc.repo.Delete(nil, id)
+	if id == "" {
+		return fmt.Errorf("%s must specify an id", types.InvalidArgument)
+	}
+	return svc.repo.Delete(ctx, id)
+}
+
+func (svc Credentials) DumpDB(ctx context.Context) (bs []byte, err error) {
+	return svc.repo.DumpDB(ctx)
 }
