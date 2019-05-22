@@ -75,7 +75,7 @@ func (s GRPCServer) GetAllMetadata(r *protobuf.GetAllMetadataRequest, srv protob
 		return err
 	}
 
-	mds := i.(protobufMetadataStream)
+	mds := i.(ProtobufMetadataStream)
 
 receiveLoop:
 	for {

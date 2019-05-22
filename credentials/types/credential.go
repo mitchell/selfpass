@@ -4,11 +4,13 @@ import (
 	"time"
 )
 
+const TypePrefixCred = "cred"
+
 type Credential struct {
 	Metadata
 	Username string
 	Email    string
-	Password string
+	Password string `json:"-"`
 }
 
 type CredentialInput struct {
@@ -25,10 +27,12 @@ type Metadata struct {
 	UpdatedAt  time.Time
 	Primary    string
 	LoginURL   string
+	Tag        string
 }
 
 type MetadataInput struct {
 	Primary    string
 	SourceHost string
 	LoginURL   string
+	Tag        string
 }

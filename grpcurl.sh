@@ -3,4 +3,4 @@ grpcurl -cacert ./certs/ca.pem \
         -key ./certs/client-key.pem \
         -proto ./credentials/protobuf/service.proto \
         localhost:8080 \
-        selfpass.credentials.CredentialService/Dump
+        selfpass.credentials.CredentialService/GetAllMetadata

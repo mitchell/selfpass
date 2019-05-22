@@ -7,16 +7,9 @@ import (
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
-func NewRedisConn(cfg ConnConfig) (c RedisConn, err error) {
-	p, err := radix.NewPool(cfg.NetworkType, cfg.Address, int(cfg.Size), cfg.Options...)
+func NewRedisConn(networkType, address string, connCount uint, options ...radix.PoolOpt) (c RedisConn, err error) {
+	p, err := radix.NewPool(networkType, address, int(connCount), options...)
 	return RedisConn{p: p}, err
-}
-
-type ConnConfig struct {
-	NetworkType string
-	Address     string
-	Size        uint
-	Options     []radix.PoolOpt
 }
 
 type RedisConn struct {
@@ -30,22 +23,23 @@ func (conn RedisConn) GetAllMetadata(ctx context.Context, sourceHost string, err
 		defer close(mdch)
 
 		var key string
-		scr := radix.NewScanner(conn.p, radix.ScanOpts{Command: scan, Pattern: sourceHost + star})
+		scr := radix.NewScanner(conn.p, radix.ScanOpts{Command: scan, Pattern: types.TypePrefixCred + dash + sourceHost + star})
 
 		for scr.Next(&key) {
 			select {
 			case <-ctx.Done():
 				return
 			default:
-				var md types.Metadata
-
-				if err := conn.p.Do(radix.Cmd(&md, hGetAll, key)); err != nil {
-					errch <- err
-					return
-				}
-
-				mdch <- md
 			}
+
+			var md types.Metadata
+
+			if err := conn.p.Do(radix.Cmd(&md, hGetAll, key)); err != nil {
+				errch <- err
+				return
+			}
+
+			mdch <- md
 		}
 	}()
 
@@ -53,41 +47,17 @@ func (conn RedisConn) GetAllMetadata(ctx context.Context, sourceHost string, err
 }
 
 func (conn RedisConn) Get(ctx context.Context, id string) (output types.Credential, err error) {
-	var key string
-	scr := radix.NewScanner(conn.p, radix.ScanOpts{Command: scan, Pattern: star + id, Count: 1})
-
-	if !scr.Next(&key) {
-		return output, nil
-	}
-
-	if err = scr.Close(); err != nil {
-		return output, err
-	}
-
-	err = conn.p.Do(radix.Cmd(&output, hGetAll, key))
-
+	err = conn.p.Do(radix.Cmd(&output, hGetAll, id))
 	return output, err
 }
 
 func (conn RedisConn) Put(ctx context.Context, c types.Credential) (err error) {
-	err = conn.p.Do(radix.FlatCmd(nil, hMSet, c.SourceHost+dash+c.ID, c))
+	err = conn.p.Do(radix.FlatCmd(nil, hMSet, c.ID, c))
 	return err
 }
 
 func (conn RedisConn) Delete(ctx context.Context, id string) (err error) {
-	var key string
-	scr := radix.NewScanner(conn.p, radix.ScanOpts{Command: scan, Pattern: star + id, Count: 1})
-
-	if !scr.Next(&key) {
-		return nil
-	}
-
-	if err = scr.Close(); err != nil {
-		return err
-	}
-
-	err = conn.p.Do(radix.Cmd(nil, del, key))
-
+	err = conn.p.Do(radix.Cmd(nil, del, id))
 	return err
 }
 

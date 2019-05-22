@@ -10,16 +10,18 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/go-kit/kit/log"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/mitchell/selfpass/credentials/middleware"
 	"github.com/mitchell/selfpass/credentials/protobuf"
 	"github.com/mitchell/selfpass/credentials/repositories"
 	"github.com/mitchell/selfpass/credentials/service"
 	"github.com/mitchell/selfpass/credentials/transport"
 	"github.com/mitchell/selfpass/credentials/types"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var logger log.Logger
@@ -29,9 +31,9 @@ func main() {
 		stop    = make(chan os.Signal, 1)
 		dev     = flag.Bool("dev", false, "enables dev mode logging")
 		port    = flag.String("port", "8080", "specify the port to listen on")
-		crtFile = flag.String("cert", "./certs/server.pem", "specify the cert file")
-		keyFile = flag.String("key", "./certs/server-key.pem", "specify the private key file")
-		caFile  = flag.String("ca", "./certs/ca.pem", "specify the ca cert file")
+		crtFile = flag.String("cert", "/run/secrets/server_cert", "specify the cert file")
+		keyFile = flag.String("key", "/run/secrets/server_key", "specify the private key file")
+		caFile  = flag.String("ca", "/run/secrets/ca_cert", "specify the ca cert file")
 		verbose = flag.Bool("v", false, "be more verbose")
 		// tableName = flag.String(
 		// 	"credential-table-name",
@@ -39,9 +41,11 @@ func main() {
 		// 	"specify the credential table name on AWS",
 		// )
 	)
-
-	signal.Notify(stop, os.Interrupt)
 	flag.Parse()
+
+	signal.Notify(stop, syscall.SIGINT)
+	signal.Notify(stop, syscall.SIGKILL)
+	signal.Notify(stop, syscall.SIGTERM)
 
 	logger = newLogger(os.Stdout, *dev)
 
@@ -61,9 +65,7 @@ func main() {
 	})
 
 	// db := repositories.NewDynamoTable(*tableName)
-	db, err := repositories.NewRedisConn(
-		repositories.ConnConfig{NetworkType: "tcp", Address: "localhost:6379", Size: 2},
-	)
+	db, err := repositories.NewRedisConn("tcp", "redis:6379", 2)
 	check(err)
 
 	var svc types.Service

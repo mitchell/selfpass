@@ -1,23 +1,23 @@
 .PHONY: all build clean format test docker-build
 
 build: clean format test
-	go build -o ./bin/server ./cmd/server/server.go
-
-docker-build:
-	docker build -t selfpass .
+	go build --o ./bin/server ./cmd/server/server.go
 
 clean:
 	rm -rf ./bin
 	go mod tidy
 
-dev: docker-build
-	docker run -i -t -p 8080:8080 selfpass -v -dev
+docker:
+	docker-compose build
 
-local: docker-build
-	docker run -i -t -p 8080:8080 selfpass
+start:
+	docker-compose up
 
 format:
-	goimports -w -l .
+	gofmt -w -s -l .
+
+install-spc:
+	go install ./cmd/spc
 
 gen-protoc:
 	protoc --go_out=plugins=grpc:. \

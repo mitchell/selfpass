@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/mitchell/selfpass/credentials/types"
 )
 
@@ -38,7 +37,7 @@ func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (ou
 	}
 
 	var c types.Credential
-	c.ID = "cred-" + uuid.New().String()
+	c.ID = generateID(ci)
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 	c.Primary = ci.Primary
@@ -47,6 +46,7 @@ func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (ou
 	c.Username = ci.Username
 	c.Email = ci.Email
 	c.Password = ci.Password
+	c.Tag = ci.Tag
 
 	err = svc.repo.Put(ctx, c)
 
@@ -57,11 +57,24 @@ func validateCredentialInput(c types.CredentialInput) (err error) {
 	switch {
 	case c.SourceHost == "":
 		return fmt.Errorf("%s must specify source host", types.InvalidArgument)
+	case c.Primary == "":
+		return fmt.Errorf("%s must specify primary user key", types.InvalidArgument)
 	case c.Password == "":
 		return fmt.Errorf("%s must specify password", types.InvalidArgument)
 	}
 
 	return err
+}
+
+func generateID(ci types.CredentialInput) string {
+	idFormat := types.TypePrefixCred + "-%s-%s"
+
+	if ci.Tag != "" {
+		idFormat += "-%s"
+		return fmt.Sprintf(idFormat, ci.SourceHost, ci.Primary, ci.Tag)
+	}
+
+	return fmt.Sprintf(idFormat, ci.SourceHost, ci.Primary)
 }
 
 func (svc Credentials) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
@@ -78,6 +91,7 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 		return output, err
 	}
 
+	c.ID = generateID(ci)
 	c.UpdatedAt = time.Now()
 	c.Primary = ci.Primary
 	c.LoginURL = ci.LoginURL
@@ -85,6 +99,7 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 	c.Password = ci.Password
 	c.Email = ci.Email
 	c.Username = ci.Username
+	c.Tag = ci.Tag
 
 	return c, svc.repo.Put(ctx, c)
 }

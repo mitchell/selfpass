@@ -16,6 +16,13 @@ func decodeGetAllMetadataRequest(ctx context.Context, request interface{}) (inte
 	}, nil
 }
 
+func EncodeGetAllMetadataRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	r := request.(endpoints.GetAllMetadataRequest)
+	return protobuf.GetAllMetadataRequest{
+		SourceHost: r.SourceHost,
+	}, nil
+}
+
 func encodeDumpResponse(ctx context.Context, response interface{}) (interface{}, error) {
 	r := response.(endpoints.DumpResponse)
 	return protobuf.DumpResponse{
@@ -50,33 +57,86 @@ func encodeMetadataStreamResponse(ctx context.Context, response interface{}) (in
 				SourceHost: md.SourceHost,
 				Primary:    md.Primary,
 				LoginUrl:   md.LoginURL,
+				Tag:        md.Tag,
 			}
 		}
 	}()
 
-	return protobufMetadataStream{
+	return ProtobufMetadataStream{
 		Metadata: pbmdch,
 		Errors:   r.Errors,
 	}, nil
 }
 
-type protobufMetadataStream struct {
+func DecodeMetdataStreamResponse(ctx context.Context, r ProtobufMetadataStream) (endpoints.MetadataStream, error) {
+	mdch := make(chan types.Metadata, 1)
+	errch := make(chan error, 1)
+
+	go func() {
+		defer close(mdch)
+
+		for pbmd := range r.Metadata {
+			createdAt, err := ptypes.Timestamp(pbmd.CreatedAt)
+			if err != nil {
+				errch <- err
+				return
+			}
+
+			updatedAt, err := ptypes.Timestamp(pbmd.UpdatedAt)
+			if err != nil {
+				errch <- err
+				return
+			}
+
+			mdch <- types.Metadata{
+				ID:         pbmd.Id,
+				SourceHost: pbmd.SourceHost,
+				CreatedAt:  createdAt,
+				UpdatedAt:  updatedAt,
+				Primary:    pbmd.Primary,
+				LoginURL:   pbmd.LoginUrl,
+				Tag:        pbmd.Tag,
+			}
+		}
+	}()
+
+	return endpoints.MetadataStream{
+		Metadata: mdch,
+		Errors:   errch,
+	}, nil
+}
+
+type ProtobufMetadataStream struct {
 	Metadata <-chan protobuf.Metadata
 	Errors   chan error
 }
 
 func decodeCredentialRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	r := request.(protobuf.CredentialRequest)
+
 	return types.CredentialInput{
 		MetadataInput: types.MetadataInput{
 			Primary:    r.Primary,
 			LoginURL:   r.LoginUrl,
 			SourceHost: r.SourceHost,
+			Tag:        r.Tag,
 		},
 		Username: r.Username,
 		Email:    r.Email,
 		Password: r.Password,
 	}, nil
+}
+
+func EncodeCredentialRequest(r types.CredentialInput) protobuf.CredentialRequest {
+	return protobuf.CredentialRequest{
+		Primary:    r.Primary,
+		Username:   r.Username,
+		Email:      r.Email,
+		Password:   r.Password,
+		SourceHost: r.SourceHost,
+		LoginUrl:   r.LoginURL,
+		Tag:        r.Tag,
+	}
 }
 
 func encodeCredentialResponse(ctx context.Context, response interface{}) (interface{}, error) {
@@ -99,14 +159,44 @@ func encodeCredentialResponse(ctx context.Context, response interface{}) (interf
 		Primary:    r.Primary,
 		SourceHost: r.SourceHost,
 		LoginUrl:   r.LoginURL,
+		Tag:        r.Tag,
 		Username:   r.Username,
 		Email:      r.Email,
 		Password:   r.Password,
 	}, nil
 }
 
+func DecodeCredential(r protobuf.Credential) (c types.Credential, err error) {
+
+	createdAt, err := ptypes.Timestamp(r.CreatedAt)
+	if err != nil {
+		return c, err
+	}
+
+	updatedAt, err := ptypes.Timestamp(r.UpdatedAt)
+	if err != nil {
+		return c, err
+	}
+
+	return types.Credential{
+		Metadata: types.Metadata{
+			ID:         r.Id,
+			SourceHost: r.SourceHost,
+			CreatedAt:  createdAt,
+			UpdatedAt:  updatedAt,
+			Primary:    r.Primary,
+			LoginURL:   r.LoginUrl,
+			Tag:        r.Tag,
+		},
+		Username: r.Username,
+		Email:    r.Email,
+		Password: r.Password,
+	}, nil
+}
+
 func decodeUpdateRequest(ctx context.Context, request interface{}) (interface{}, error) {
 	r := request.(protobuf.UpdateRequest)
+
 	return endpoints.UpdateRequest{
 		ID: r.Id,
 		Credential: types.CredentialInput{
@@ -114,10 +204,29 @@ func decodeUpdateRequest(ctx context.Context, request interface{}) (interface{},
 				Primary:    r.Credential.Primary,
 				SourceHost: r.Credential.SourceHost,
 				LoginURL:   r.Credential.LoginUrl,
+				Tag:        r.Credential.Tag,
 			},
 			Username: r.Credential.Username,
 			Email:    r.Credential.Email,
 			Password: r.Credential.Password,
+		},
+	}, nil
+}
+
+func EncodeUpdateRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	r := request.(endpoints.UpdateRequest)
+
+	c := r.Credential
+	return protobuf.UpdateRequest{
+		Id: r.ID,
+		Credential: &protobuf.CredentialRequest{
+			Primary:    c.Primary,
+			Username:   c.Username,
+			Email:      c.Email,
+			Password:   c.Password,
+			SourceHost: c.SourceHost,
+			LoginUrl:   c.LoginURL,
+			Tag:        c.Tag,
 		},
 	}, nil
 }
@@ -129,6 +238,12 @@ func decodeIdRequest(ctx context.Context, request interface{}) (interface{}, err
 	}, nil
 }
 
-func noOp(ctx context.Context, request interface{}) (interface{}, error) {
+func EncodeIdRequest(r endpoints.IDRequest) protobuf.IdRequest {
+	return protobuf.IdRequest{
+		Id: r.ID,
+	}
+}
+
+func noOp(context.Context, interface{}) (interface{}, error) {
 	return nil, nil
 }
