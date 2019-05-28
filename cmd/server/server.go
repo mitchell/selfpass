@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"flag"
 	"io"
-	"io/ioutil"
 	stdlog "log"
 	"net"
 	"os"
@@ -28,13 +27,10 @@ var logger log.Logger
 
 func main() {
 	var (
-		stop    = make(chan os.Signal, 1)
-		dev     = flag.Bool("dev", false, "enables dev mode logging")
-		port    = flag.String("port", "8080", "specify the port to listen on")
-		crtFile = flag.String("cert", "/run/secrets/server_cert", "specify the cert file")
-		keyFile = flag.String("key", "/run/secrets/server_key", "specify the private key file")
-		caFile  = flag.String("ca", "/run/secrets/ca_cert", "specify the ca cert file")
-		verbose = flag.Bool("v", false, "be more verbose")
+		stop     = make(chan os.Signal, 1)
+		jsonLogs = flag.Bool("json-logs", false, "enables json logging")
+		port     = flag.String("port", "8080", "specify the port to listen on")
+		verbose  = flag.Bool("v", false, "be more verbose")
 		// tableName = flag.String(
 		// 	"credential-table-name",
 		// 	"selfpass-credential",
@@ -47,16 +43,13 @@ func main() {
 	signal.Notify(stop, syscall.SIGKILL)
 	signal.Notify(stop, syscall.SIGTERM)
 
-	logger = newLogger(os.Stdout, *dev)
+	logger = newLogger(os.Stdout, *jsonLogs)
 
-	keypair, err := tls.LoadX509KeyPair(*crtFile, *keyFile)
-	check(err)
-
-	ca, err := ioutil.ReadFile(*caFile)
+	keypair, err := tls.X509KeyPair([]byte(cert), []byte(key))
 	check(err)
 
 	caPool := x509.NewCertPool()
-	caPool.AppendCertsFromPEM(ca)
+	caPool.AppendCertsFromPEM([]byte(ca))
 
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates: []tls.Certificate{keypair},
@@ -85,7 +78,6 @@ func main() {
 	_ = logger.Log(
 		"message", "serving",
 		"address", addr,
-		"dev", dev,
 	)
 
 	go func() { check(srv.Serve(lis)) }()
@@ -95,13 +87,11 @@ func main() {
 	srv.GracefulStop()
 }
 
-func newLogger(writer io.Writer, dev bool) log.Logger {
-	var l log.Logger
+func newLogger(writer io.Writer, jsonLogs bool) log.Logger {
 	writer = log.NewSyncWriter(writer)
+	l := log.NewLogfmtLogger(writer)
 
-	if dev {
-		l = log.NewLogfmtLogger(writer)
-	} else {
+	if jsonLogs {
 		l = log.NewJSONLogger(writer)
 	}
 	l = log.WithPrefix(l, "caller", log.Caller(5), "timestamp", log.DefaultTimestamp)

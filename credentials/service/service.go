@@ -46,6 +46,7 @@ func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (ou
 	c.Username = ci.Username
 	c.Email = ci.Email
 	c.Password = ci.Password
+	c.OTPSecret = ci.OTPSecret
 	c.Tag = ci.Tag
 
 	err = svc.repo.Put(ctx, c)
@@ -97,6 +98,7 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 	c.LoginURL = ci.LoginURL
 	c.SourceHost = ci.SourceHost
 	c.Password = ci.Password
+	c.OTPSecret = ci.OTPSecret
 	c.Email = ci.Email
 	c.Username = ci.Username
 	c.Tag = ci.Tag

@@ -1,56 +1,67 @@
-package cmd
+package commands
 
 import (
 	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/mitchell/selfpass/credentials/cmds"
-	"github.com/mitchell/selfpass/credentials/types"
+	"github.com/mitchell/selfpass/credentials/commands"
+	credtypes "github.com/mitchell/selfpass/credentials/types"
 	"github.com/mitchell/selfpass/crypto"
 )
 
-func Execute(ctx context.Context, initClient types.CredentialClientInit) {
+func Execute(initClient credtypes.CredentialClientInit) {
 	rootCmd := &cobra.Command{
 		Use:   "spc",
 		Short: "This is the CLI client for Selfpass.",
 		Long: `This is the CLI client for Selfpass, the self-hosted password manager. With this tool you
 can interact with the entire Selfpass API.`,
+		Version: "v0.1.0",
 	}
+	rootCmd.InitDefaultHelpFlag()
+	rootCmd.InitDefaultVersionFlag()
 
 	cfgFile := rootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.spc.toml)")
-	rootCmd.PersistentFlags().Parse(os.Args)
-
-	decryptCfg := rootCmd.Flags().Bool("decrypt-cfg", false, "unencrypt config file")
-	rootCmd.Flags().Parse(os.Args)
-
+	decryptCfg := rootCmd.Flags().Bool("decrypt-cfg", false, "decrypt config file")
+	check(rootCmd.ParseFlags(os.Args))
 	encryptCfg := !*decryptCfg
-	masterpass, cfg := openConfig(*cfgFile)
-	if encryptCfg && masterpass != "" {
-		defer encryptConfig(masterpass, cfg)
-	}
-	if *decryptCfg {
-		fmt.Println("Decrypting config file. It will auto-encrypt when you next run of spc.")
-		return
+
+	var masterpass string
+	var cfg *viper.Viper
+	needsCfg := (len(os.Args) > 1 && !strings.Contains(strings.Join(os.Args, "--"), "--help")) || *decryptCfg
+
+	if needsCfg {
+		masterpass, cfg = openConfig(*cfgFile)
+		if encryptCfg && masterpass != "" {
+			defer encryptConfig(masterpass, cfg)
+		}
+		if *decryptCfg {
+			fmt.Println("Decrypting config file. It will auto-encrypt when you next run of spc.")
+			return
+		}
 	}
 
-	rootCmd.AddCommand(makeInitCmd(cfg))
-	rootCmd.AddCommand(cmds.MakeListCmd(makeInitClient(cfg, initClient)))
-	rootCmd.AddCommand(cmds.MakeCreateCmd(masterpass, cfg, makeInitClient(cfg, initClient)))
-	rootCmd.AddCommand(cmds.MakeGetCmd(masterpass, cfg, makeInitClient(cfg, initClient)))
+	rootCmd.AddCommand(makeInit(cfg))
+	rootCmd.AddCommand(makeEncrypt(masterpass, cfg))
+	rootCmd.AddCommand(makeDecrypt(masterpass, cfg))
+	rootCmd.AddCommand(commands.MakeList(makeInitClient(cfg, initClient)))
+	rootCmd.AddCommand(commands.MakeCreate(masterpass, cfg, makeInitClient(cfg, initClient)))
+	rootCmd.AddCommand(commands.MakeGet(masterpass, cfg, makeInitClient(cfg, initClient)))
+	rootCmd.AddCommand(commands.MakeDelete(makeInitClient(cfg, initClient)))
 
 	check(rootCmd.Execute())
 }
 
-func makeInitClient(cfg *viper.Viper, initClient types.CredentialClientInit) cmds.CredentialClientInit {
-	return func(ctx context.Context) types.CredentialClient {
-		connConfig := cfg.GetStringMapString(cmds.KeyConnConfig)
+func makeInitClient(cfg *viper.Viper, initClient credtypes.CredentialClientInit) commands.CredentialClientInit {
+	return func(ctx context.Context) credtypes.CredentialClient {
+		connConfig := cfg.GetStringMapString(keyConnConfig)
 
 		client, err := initClient(
 			ctx,
@@ -145,3 +156,5 @@ func check(err error) {
 		os.Exit(1)
 	}
 }
+
+const keyConnConfig = "connection"

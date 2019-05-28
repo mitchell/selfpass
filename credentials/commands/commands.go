@@ -1,4 +1,4 @@
-package cmds
+package commands
 
 import (
 	"context"
@@ -17,5 +17,4 @@ func check(err error) {
 	}
 }
 
-const KeyConnConfig = "connection"
 const KeyPrivateKey = "private_key"

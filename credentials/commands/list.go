@@ -1,15 +1,14 @@
-package cmds
+package commands
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
-func MakeListCmd(initClient CredentialClientInit) *cobra.Command {
+func MakeList(initClient CredentialClientInit) *cobra.Command {
 	var sourceHost string
 
 	listCmd := &cobra.Command{
@@ -38,11 +37,11 @@ includes almost all the information but the most sensitive.`,
 						break receive
 					}
 
-					mdjson, err := json.MarshalIndent(md, "", "  ")
-					check(err)
-					fmt.Println(string(mdjson))
+					fmt.Println(md)
 				}
 			}
+
+			fmt.Println("Done listing.")
 		},
 	}
 

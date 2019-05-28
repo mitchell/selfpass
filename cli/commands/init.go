@@ -1,4 +1,4 @@
-package cmd
+package commands
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/mitchell/selfpass/credentials/cmds"
+	"github.com/mitchell/selfpass/credentials/commands"
 )
 
-func makeInitCmd(cfg *viper.Viper) *cobra.Command {
+func makeInit(cfg *viper.Viper) *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "This command initializes SPC for the first time",
@@ -33,7 +33,7 @@ the users private key, and server certificates. (All of which will be encrypted)
 				privateKey  = strings.Replace(uuid.New().String(), "-", "", -1)
 			)
 
-			prompt = &survey.Password{Message: "Master password:"}
+			prompt = &survey.Password{Message: "New master password:"}
 			check(survey.AskOne(prompt, &masterpass, nil))
 
 			prompt = &survey.Password{Message: "Confirm master password:"}
@@ -69,14 +69,14 @@ the users private key, and server certificates. (All of which will be encrypted)
 			key, err := ioutil.ReadFile(keyFile)
 			check(err)
 
-			cfg.Set(cmds.KeyConnConfig, map[string]string{
+			cfg.Set(keyConnConfig, map[string]string{
 				"target": target,
 				"ca":     string(ca),
 				"cert":   string(cert),
 				"key":    string(key),
 			})
 
-			cfg.Set(cmds.KeyPrivateKey, privateKey)
+			cfg.Set(commands.KeyPrivateKey, privateKey)
 
 			if err := cfg.WriteConfig(); err != nil {
 				home, err := homedir.Dir()

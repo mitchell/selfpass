@@ -1,21 +1,16 @@
 version: "3.7"
 services:
   redis:
-    image: "redis:alpine"
-  selfpass:
+    image: "redis:5.0.5"
+    volumes:
+      - "./data:/data"
+  server:
     build: .
-    entrypoint:
-      - server
+    restart: always
     ports:
       - "8080:8080"
-    secrets:
-      - ca_cert
-      - server_cert
-      - server_key
-secrets:
-  ca_cert:
-    file: ./certs/ca.pem
-  server_cert:
-    file: ./certs/server.pem
-  server_key:
-    file: ./certs/server-key.pem
+    entrypoint:
+      - server
+      - -v
+    depends_on:
+      - redis

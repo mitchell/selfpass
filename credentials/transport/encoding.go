@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/golang/protobuf/ptypes"
+
 	"github.com/mitchell/selfpass/credentials/endpoints"
 	"github.com/mitchell/selfpass/credentials/protobuf"
 	"github.com/mitchell/selfpass/credentials/types"
@@ -121,9 +122,10 @@ func decodeCredentialRequest(ctx context.Context, request interface{}) (interfac
 			SourceHost: r.SourceHost,
 			Tag:        r.Tag,
 		},
-		Username: r.Username,
-		Email:    r.Email,
-		Password: r.Password,
+		Username:  r.Username,
+		Email:     r.Email,
+		Password:  r.Password,
+		OTPSecret: r.OtpSecret,
 	}, nil
 }
 
@@ -133,6 +135,7 @@ func EncodeCredentialRequest(r types.CredentialInput) protobuf.CredentialRequest
 		Username:   r.Username,
 		Email:      r.Email,
 		Password:   r.Password,
+		OtpSecret:  r.OTPSecret,
 		SourceHost: r.SourceHost,
 		LoginUrl:   r.LoginURL,
 		Tag:        r.Tag,
@@ -163,6 +166,7 @@ func encodeCredentialResponse(ctx context.Context, response interface{}) (interf
 		Username:   r.Username,
 		Email:      r.Email,
 		Password:   r.Password,
+		OtpSecret:  r.OTPSecret,
 	}, nil
 }
 
@@ -188,9 +192,10 @@ func DecodeCredential(r protobuf.Credential) (c types.Credential, err error) {
 			LoginURL:   r.LoginUrl,
 			Tag:        r.Tag,
 		},
-		Username: r.Username,
-		Email:    r.Email,
-		Password: r.Password,
+		Username:  r.Username,
+		Email:     r.Email,
+		Password:  r.Password,
+		OTPSecret: r.OtpSecret,
 	}, nil
 }
 
@@ -206,16 +211,15 @@ func decodeUpdateRequest(ctx context.Context, request interface{}) (interface{},
 				LoginURL:   r.Credential.LoginUrl,
 				Tag:        r.Credential.Tag,
 			},
-			Username: r.Credential.Username,
-			Email:    r.Credential.Email,
-			Password: r.Credential.Password,
+			Username:  r.Credential.Username,
+			Email:     r.Credential.Email,
+			Password:  r.Credential.Password,
+			OTPSecret: r.Credential.OtpSecret,
 		},
 	}, nil
 }
 
-func EncodeUpdateRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	r := request.(endpoints.UpdateRequest)
-
+func EncodeUpdateRequest(r endpoints.UpdateRequest) protobuf.UpdateRequest {
 	c := r.Credential
 	return protobuf.UpdateRequest{
 		Id: r.ID,
@@ -224,11 +228,12 @@ func EncodeUpdateRequest(ctx context.Context, request interface{}) (interface{},
 			Username:   c.Username,
 			Email:      c.Email,
 			Password:   c.Password,
+			OtpSecret:  c.OTPSecret,
 			SourceHost: c.SourceHost,
 			LoginUrl:   c.LoginURL,
 			Tag:        c.Tag,
 		},
-	}, nil
+	}
 }
 
 func decodeIdRequest(ctx context.Context, request interface{}) (interface{}, error) {

@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"io"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+
 	"github.com/mitchell/selfpass/credentials/endpoints"
 	"github.com/mitchell/selfpass/credentials/protobuf"
 	"github.com/mitchell/selfpass/credentials/transport"
 	"github.com/mitchell/selfpass/credentials/types"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 func NewCredentialServiceClient(ctx context.Context, target, ca, cert, key string) (types.CredentialClient, error) {
@@ -34,16 +35,16 @@ func NewCredentialServiceClient(ctx context.Context, target, ca, cert, key strin
 		return nil, err
 	}
 
-	return CredentialServiceClient{
+	return credentialServiceClient{
 		client: protobuf.NewCredentialServiceClient(conn),
 	}, nil
 }
 
-type CredentialServiceClient struct {
+type credentialServiceClient struct {
 	client protobuf.CredentialServiceClient
 }
 
-func (c CredentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {
+func (c credentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {
 	pbmdch := make(chan protobuf.Metadata, 1)
 	errch = make(chan error, 1)
 
@@ -84,7 +85,7 @@ func (c CredentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost 
 	return stream.Metadata, stream.Errors
 }
 
-func (c CredentialServiceClient) Get(ctx context.Context, id string) (output types.Credential, err error) {
+func (c credentialServiceClient) Get(ctx context.Context, id string) (output types.Credential, err error) {
 	req := transport.EncodeIdRequest(endpoints.IDRequest{ID: id})
 
 	res, err := c.client.Get(ctx, &req)
@@ -95,7 +96,7 @@ func (c CredentialServiceClient) Get(ctx context.Context, id string) (output typ
 	return transport.DecodeCredential(*res)
 }
 
-func (c CredentialServiceClient) Create(ctx context.Context, ci types.CredentialInput) (output types.Credential, err error) {
+func (c credentialServiceClient) Create(ctx context.Context, ci types.CredentialInput) (output types.Credential, err error) {
 	req := transport.EncodeCredentialRequest(ci)
 
 	res, err := c.client.Create(ctx, &req)
@@ -106,10 +107,26 @@ func (c CredentialServiceClient) Create(ctx context.Context, ci types.Credential
 	return transport.DecodeCredential(*res)
 }
 
-func (c CredentialServiceClient) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
-	panic("implement me")
+func (c credentialServiceClient) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
+	req := transport.EncodeUpdateRequest(endpoints.UpdateRequest{ID: id, Credential: ci})
+
+	res, err := c.client.Update(ctx, &req)
+	if err != nil {
+		return output, err
+	}
+
+	return transport.DecodeCredential(*res)
 }
 
-func (c CredentialServiceClient) Delete(ctx context.Context, id string) (err error) {
-	panic("implement me")
+func (c credentialServiceClient) Delete(ctx context.Context, id string) (err error) {
+	req := transport.EncodeIdRequest(endpoints.IDRequest{ID: id})
+
+	res, err := c.client.Delete(ctx, &req)
+	if err != nil {
+		return err
+	}
+	if !res.Success {
+		return fmt.Errorf("delete unsuccessful")
+	}
+	return nil
 }

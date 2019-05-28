@@ -4,7 +4,9 @@ require (
 	github.com/Netflix/go-expect v0.0.0-20180928190340-9d1f4485533b // indirect
 	github.com/atotto/clipboard v0.1.2
 	github.com/aws/aws-sdk-go-v2 v0.7.0
+	github.com/boombuler/barcode v1.0.0 // indirect
 	github.com/cloudflare/redoctober v0.0.0-20180928214028-3f826eedb692
+	github.com/davecgh/go-spew v1.1.1
 	github.com/go-kit/kit v0.8.0
 	github.com/go-logfmt/logfmt v0.4.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
@@ -17,8 +19,8 @@ require (
 	github.com/mattn/go-isatty v0.0.7 // indirect
 	github.com/mediocregopher/radix/v3 v3.2.3
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pquerna/otp v1.1.0
 	github.com/spf13/cobra v0.0.3
-	github.com/spf13/pflag v1.0.3
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
