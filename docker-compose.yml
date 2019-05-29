@@ -2,15 +2,16 @@ version: "3.7"
 services:
   redis:
     image: "redis:5.0.5"
+    restart: on-failure
     volumes:
       - "./data:/data"
   server:
     build: .
-    restart: always
-    ports:
-      - "8080:8080"
+    restart: on-failure
     entrypoint:
       - server
       - -v
+    ports:
+      - "8080:8080"
     depends_on:
       - redis

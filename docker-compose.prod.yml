@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  redis:
+    volumes:
+      - "/home/selfpass/data:/data"
+  server:
+    entrypoint:
+      - server

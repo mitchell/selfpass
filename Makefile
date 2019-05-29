@@ -1,4 +1,4 @@
-.PHONY: all build clean format test docker-build
+.PHONY: all build clean format test
 
 build: clean format
 	env CGO_ENABLED=0 go build -o ./bin/server ./cmd/server
@@ -11,31 +11,30 @@ clean:
 docker:
 	docker-compose build
 
+local:
+	docker-compose up -d
+
 up:
-	docker-compose up
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
 
 upd:
-	docker-compose up -d
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 down:
 	docker-compose down
 
 machine-create-google:
 	docker-machine create --driver google \
-	    --google-address m-selfpass \
+	    --google-address selfpass \
 	    --google-project selfpass-241808 \
-	    --google-machine-type n1-standard-1 \
+	    --google-machine-type f1-micro \
 	    --google-machine-image https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-9-stretch-v20190514 \
+	    --google-username selfpass \
+	    --google-zone us-west1-c \
 	    selfpass01
 
 machine-rm:
 	docker-machine rm selfpass01
-
-machine-ssh:
-	docker-machine ssh selfpass01
-
-machine-env:
-	docker-machine env selfpass01
 
 format:
 	gofmt -w -s -l .
