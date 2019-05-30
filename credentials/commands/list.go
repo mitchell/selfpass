@@ -3,8 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -49,9 +47,7 @@ includes almost all the information but the most sensitive.`,
 							break receive
 						}
 
-						clearCmd := exec.Command("clear")
-						clearCmd.Stdout = os.Stdout
-						check(clearCmd.Run())
+						fmt.Println()
 					}
 
 					fmt.Println(md)
