@@ -21,7 +21,7 @@ func MakeDelete(initConfig CredentialClientInit) *cobra.Command {
 			check(survey.AskOne(prompt, &confirmed, nil))
 
 			if confirmed {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 				defer cancel()
 
 				check(initConfig(ctx).Delete(ctx, args[0]))

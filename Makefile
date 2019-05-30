@@ -1,15 +1,15 @@
-.PHONY: all build clean format test
+.PHONY: all build clean format test gen-certs-go
 
 build: clean format
 	env CGO_ENABLED=0 go build -o ./bin/server ./cmd/server
-	rm ./cmd/server/certs.go
 
 clean:
 	rm -rf ./bin
 	go mod tidy
 
-docker:
+docker: gen-certs-go
 	docker-compose build
+	rm ./cmd/server/certs.go
 
 local:
 	docker-compose up -d

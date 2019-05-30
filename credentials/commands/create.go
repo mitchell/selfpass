@@ -91,7 +91,7 @@ password.`,
 				check(survey.AskOne(prompt, &cpass, nil))
 
 				if ci.Password != cpass {
-					fmt.Println("passwords didn't match'")
+					fmt.Println("passwords didn't match")
 					os.Exit(1)
 				}
 			}
@@ -127,7 +127,7 @@ password.`,
 				}
 			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
 			c, err := initClient(ctx).Create(ctx, ci)

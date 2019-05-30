@@ -25,7 +25,7 @@ decrypting password.`,
 		Args: cobra.ExactArgs(1),
 
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 			defer cancel()
 
 			cred, err := initClient(ctx).Get(ctx, args[0])
