@@ -1,15 +1,14 @@
 .PHONY: all build clean format test gen-certs-go
 
-build: clean format
-	env CGO_ENABLED=0 go build -o ./bin/server ./cmd/server
+build: clean gen-certs-go format
+	go build -mod=vendor -o ./bin/server ./cmd/server
+	rm ./cmd/server/certs.go
 
 clean:
 	rm -rf ./bin
-	go mod tidy
 
-docker: gen-certs-go
+docker: install
 	docker-compose build
-	rm ./cmd/server/certs.go
 
 local:
 	docker-compose up -d
@@ -38,6 +37,10 @@ machine-rm:
 
 format:
 	gofmt -w -s -l .
+
+install:
+	go mod tidy
+	go mod vendor
 
 install-spc:
 	go install ./cmd/spc

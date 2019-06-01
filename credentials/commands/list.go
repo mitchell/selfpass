@@ -3,9 +3,12 @@ package commands
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
+
+	"github.com/mitchell/selfpass/credentials/types"
 )
 
 func MakeList(initClient CredentialClientInit) *cobra.Command {
@@ -18,9 +21,11 @@ func MakeList(initClient CredentialClientInit) *cobra.Command {
 includes almost all the information but the most sensitive.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
 
-			ctx := context.Background()
 			mdch, errch := initClient(ctx).GetAllMetadata(ctx, sourceHost)
+			mds := map[string][]types.Metadata{}
 
 			fmt.Println()
 
@@ -38,33 +43,32 @@ includes almost all the information but the most sensitive.`,
 						break receive
 					}
 
-					if count != 0 && count%3 == 0 {
-						var proceed bool
-						prompt := &survey.Confirm{Message: "Next page?", Default: true}
-						check(survey.AskOne(prompt, &proceed, nil))
-
-						if !proceed {
-							break receive
-						}
-
-						fmt.Println()
-					}
-
-					fmt.Println(md)
+					mds[md.SourceHost] = append(mds[md.SourceHost], md)
 				}
+			}
+
+			sources := []string{}
+			for source := range mds {
+				sources = append(sources, source)
+			}
+
+			prompt := &survey.Select{
+				Message:  "Source host:",
+				Options:  sources,
+				PageSize: 10,
+				VimMode:  true,
+			}
+
+			var source string
+			check(survey.AskOne(prompt, &source, nil))
+
+			for _, md := range mds[source] {
+				fmt.Println(md)
 			}
 
 			fmt.Println("Done listing.")
 		},
 	}
-
-	listCmd.Flags().StringVarP(
-		&sourceHost,
-		"source-host",
-		"s",
-		"",
-		"specify which source host to filter the results by",
-	)
 
 	return listCmd
 }

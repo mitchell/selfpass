@@ -1,6 +1,8 @@
 .idea
 bin
 certs
+certs.go
 data
 *.tar
 *.enc
+vendor

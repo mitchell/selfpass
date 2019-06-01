@@ -31,11 +31,6 @@ func main() {
 		jsonLogs = flag.Bool("json-logs", false, "enables json logging")
 		port     = flag.String("port", "8080", "specify the port to listen on")
 		verbose  = flag.Bool("v", false, "be more verbose")
-		// tableName = flag.String(
-		// 	"credential-table-name",
-		// 	"selfpass-credential",
-		// 	"specify the credential table name on AWS",
-		// )
 	)
 	flag.Parse()
 
@@ -57,7 +52,6 @@ func main() {
 		ClientAuth:   tls.RequireAndVerifyClientCert,
 	})
 
-	// db := repositories.NewDynamoTable(*tableName)
 	db, err := repositories.NewRedisConn("tcp", "redis:6379", 2)
 	check(err)
 
