@@ -10,14 +10,14 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/pquerna/otp/totp"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	clitypes "github.com/mitchell/selfpass/cli/types"
 	"github.com/mitchell/selfpass/credentials/types"
 	"github.com/mitchell/selfpass/crypto"
 )
 
-func MakeGet(masterpass string, cfg *viper.Viper, initClient CredentialClientInit) *cobra.Command {
+func MakeGet(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a credential info and copy password to clipboard",
@@ -29,6 +29,9 @@ decrypting password.`,
 			defer cancel()
 
 			client := initClient(ctx)
+			masterpass, cfg, err := repo.OpenConfig()
+			check(err)
+
 			mdch, errch := client.GetAllMetadata(ctx, "")
 			mds := map[string][]types.Metadata{}
 

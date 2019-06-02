@@ -11,14 +11,14 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/pquerna/otp/totp"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	clitypes "github.com/mitchell/selfpass/cli/types"
 	"github.com/mitchell/selfpass/credentials/types"
 	"github.com/mitchell/selfpass/crypto"
 )
 
-func MakeCreate(masterpass string, cfg *viper.Viper, initClient CredentialClientInit) *cobra.Command {
+func MakeCreate(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
 	var length uint
 	var numbers bool
 	var specials bool
@@ -30,6 +30,9 @@ func MakeCreate(masterpass string, cfg *viper.Viper, initClient CredentialClient
 password.`,
 
 		Run: func(_ *cobra.Command, args []string) {
+			masterpass, cfg, err := repo.OpenConfig()
+			check(err)
+
 			mdqs := []*survey.Question{
 				{
 					Name:   "primary",

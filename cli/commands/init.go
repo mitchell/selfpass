@@ -8,13 +8,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	"github.com/mitchell/selfpass/cli/types"
 	"github.com/mitchell/selfpass/credentials/commands"
 )
 
-func makeInit(cfg *viper.Viper) *cobra.Command {
+func makeInit(repo types.ConfigRepo) *cobra.Command {
 	initCmd := &cobra.Command{
 		Use:   "init",
 		Short: "This command initializes SPC for the first time",
@@ -32,6 +32,7 @@ the users private key, and server certificates. (All of which will be encrypted)
 				prompt      survey.Prompt
 				privateKey  = strings.Replace(uuid.New().String(), "-", "", -1)
 			)
+			_, cfg, _ := repo.OpenConfig()
 
 			prompt = &survey.Password{Message: "New master password:"}
 			check(survey.AskOne(prompt, &masterpass, nil))
@@ -42,6 +43,8 @@ the users private key, and server certificates. (All of which will be encrypted)
 				check(fmt.Errorf("master passwords didn't match"))
 			}
 
+			repo.SetMasterpass(masterpass)
+
 			prompt = &survey.Input{Message: "Selfpass server address:"}
 			check(survey.AskOne(prompt, &target, nil))
 
@@ -49,7 +52,7 @@ the users private key, and server certificates. (All of which will be encrypted)
 			check(survey.AskOne(prompt, &hasPK, nil))
 
 			if hasPK {
-				prompt = &survey.Input{Message: "Private key:"}
+				prompt = &survey.Password{Message: "Private key:"}
 				check(survey.AskOne(prompt, &privateKey, nil))
 				privateKey = strings.Replace(privateKey, "-", "", -1)
 			}
@@ -86,8 +89,6 @@ the users private key, and server certificates. (All of which will be encrypted)
 				cfg.SetConfigFile(home + "/.spc.toml")
 				fmt.Println("Wrote new config to: " + home + "/.spc.toml")
 			}
-
-			encryptConfig(masterpass, cfg)
 		},
 	}
 

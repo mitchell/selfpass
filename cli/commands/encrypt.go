@@ -7,13 +7,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
+	"github.com/mitchell/selfpass/cli/types"
 	"github.com/mitchell/selfpass/credentials/commands"
 	"github.com/mitchell/selfpass/crypto"
 )
 
-func makeEncrypt(masterpass string, cfg *viper.Viper) *cobra.Command {
+func makeEncrypt(repo types.ConfigRepo) *cobra.Command {
 	encryptCmd := &cobra.Command{
 		Use:   "encrypt [file]",
 		Short: "Encrypt a file using your masterpass and secret key",
@@ -22,6 +22,9 @@ new file.`,
 		Args: cobra.ExactArgs(1),
 
 		Run: func(cmd *cobra.Command, args []string) {
+			masterpass, cfg, err := repo.OpenConfig()
+			check(err)
+
 			file := args[0]
 			fileEnc := file + ".enc"
 
