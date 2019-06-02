@@ -31,6 +31,10 @@ machine-create-google:
 	    --google-username selfpass \
 	    --google-zone us-west1-c \
 	    selfpass01
+	$(MAKE) machine-put-redis.conf
+	$(MAKE) machine-put-data
+	$(MAKE) machine-install-stackdriver-agent
+	$(MAKE) machine-add-grpc-server-tag
 
 machine-rm:
 	docker-machine rm selfpass01
