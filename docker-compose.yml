@@ -3,7 +3,11 @@ services:
   redis:
     image: "redis:5.0.5"
     restart: on-failure
+    command:
+      - redis-server
+      - /redis.conf
     volumes:
+      - "./redis.conf:/redis.conf"
       - "./data:/data"
   server:
     build: .

@@ -14,6 +14,7 @@ require (
 	github.com/pquerna/otp v1.1.0
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/viper v1.4.0
+	golang.org/x/crypto v0.0.0-20190530122614-20be4c3c3ed5 // indirect
 	google.golang.org/grpc v1.21.0
 	gopkg.in/AlecAivazis/survey.v1 v1.8.5
 )
