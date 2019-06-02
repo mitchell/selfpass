@@ -1,14 +1,14 @@
 .PHONY: all build clean format test gen-certs-go
 
-docker: install
+docker: clean format install
 	docker-compose build
 
-build: clean gen-certs-go format
+build: gen-certs-go
 	go build -mod=vendor -o ./bin/server ./cmd/server
 	rm ./cmd/server/certs.go
 
 clean:
-	rm -rf ./bin
+	rm -rf ./bin ./vendor ./cmd/server/certs.go
 
 local:
 	docker-compose up -d
