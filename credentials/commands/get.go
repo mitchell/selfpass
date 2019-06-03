@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -60,11 +61,13 @@ decrypting password.`,
 				sources = append(sources, source)
 			}
 
+			sort.Strings(sources)
+
 			var prompt survey.Prompt
 			prompt = &survey.Select{
 				Message:  "Source host:",
 				Options:  sources,
-				PageSize: 10,
+				PageSize: 20,
 				VimMode:  true,
 			}
 
@@ -85,7 +88,7 @@ decrypting password.`,
 			prompt = &survey.Select{
 				Message:  "Primary user key (and tag):",
 				Options:  keys,
-				PageSize: 10,
+				PageSize: 20,
 				VimMode:  true,
 			}
 

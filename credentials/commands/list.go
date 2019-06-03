@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -52,10 +53,12 @@ includes almost all the information but the most sensitive.`,
 				sources = append(sources, source)
 			}
 
+			sort.Strings(sources)
+
 			prompt := &survey.Select{
 				Message:  "Source host:",
 				Options:  sources,
-				PageSize: 10,
+				PageSize: 20,
 				VimMode:  true,
 			}
 
