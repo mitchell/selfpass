@@ -107,7 +107,7 @@ decrypting password.`,
 
 			fmt.Println("Wrote primary user key to clipboard.")
 
-			key, err := hex.DecodeString(cfg.GetString(KeyPrivateKey))
+			key, err := hex.DecodeString(cfg.GetString(clitypes.KeyPrivateKey))
 			check(err)
 
 			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), key)

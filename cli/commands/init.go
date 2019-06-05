@@ -6,12 +6,10 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/mitchell/selfpass/cli/types"
-	"github.com/mitchell/selfpass/credentials/commands"
 )
 
 func makeInit(repo types.ConfigRepo) *cobra.Command {
@@ -72,23 +70,16 @@ the users private key, and server certificates. (All of which will be encrypted)
 			key, err := ioutil.ReadFile(keyFile)
 			check(err)
 
-			cfg.Set(keyConnConfig, map[string]string{
+			cfg.Set(types.KeyConnConfig, map[string]string{
 				"target": target,
 				"ca":     string(ca),
 				"cert":   string(cert),
 				"key":    string(key),
 			})
 
-			cfg.Set(commands.KeyPrivateKey, privateKey)
+			cfg.Set(types.KeyPrivateKey, privateKey)
 
-			if err := cfg.WriteConfig(); err != nil {
-				home, err := homedir.Dir()
-				check(err)
-
-				check(cfg.WriteConfigAs(home + "/.spc.toml"))
-				cfg.SetConfigFile(home + "/.spc.toml")
-				fmt.Println("Wrote new config to: " + home + "/.spc.toml")
-			}
+			check(repo.WriteConfig())
 		},
 	}
 

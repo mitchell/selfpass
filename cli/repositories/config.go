@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -20,8 +21,6 @@ func NewConfigManager(cfgFile *string) *ConfigManager {
 
 type ConfigManager struct {
 	masterpass string
-	decrypted  bool
-	decrypt    bool
 	cfgFile    *string
 	v          *viper.Viper
 }
@@ -36,110 +35,110 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	}
 	cfg := *mgr.cfgFile
 
-	v = viper.New()
-	mgr.v = v
+	mgr.v = viper.New()
+	mgr.v.SetConfigType("toml")
 
-	v.SetConfigType("toml")
-
-	if cfg != "" {
-		// Use config file from the flag.
-		v.SetConfigFile(cfg)
-	} else {
-		// Find home directory.
+	if cfg == "" {
 		home, err := homedir.Dir()
 		if err != nil {
 			return output, nil, err
 		}
 
-		// Search config in home directory with name ".spc" (without extension).
-		v.AddConfigPath(home)
-		v.SetConfigName(".spc")
-
 		cfg = home + "/.spc.toml"
 	}
 
-	if _, err := os.Open(cfg); !os.IsNotExist(err) {
-		prompt := &survey.Password{Message: "Master password:"}
-		if err = survey.AskOne(prompt, &mgr.masterpass, nil); err != nil {
-			return output, nil, err
-		}
+	mgr.v.SetConfigFile(cfg)
+	mgr.cfgFile = &cfg
 
-		mgr.decrypted, err = decryptConfig(mgr.masterpass, cfg)
-		if err != nil {
-			return output, nil, err
-		}
+	var contents []byte
+	var wasNotEncrypted bool
+
+	if _, err := os.Open(cfg); os.IsNotExist(err) {
+		return output, mgr.v, fmt.Errorf("no config found, run 'init' command")
+	}
+
+	prompt := &survey.Password{Message: "Master password:"}
+	if err = survey.AskOne(prompt, &mgr.masterpass, nil); err != nil {
+		return output, nil, err
+	}
+
+	contents, err = mgr.decryptConfig(mgr.masterpass, cfg)
+	if err != nil && err.Error() == "ciphertext is not a multiple of the block size" {
+		fmt.Println("Config wasn't encrypted.")
+		wasNotEncrypted = true
+	} else if err != nil {
+		return output, nil, err
 	}
 
 	// v.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err = v.ReadInConfig(); err != nil {
-		mgr.decrypted = true
-		return output, v, fmt.Errorf("no config found, run 'init' command")
+	if err = mgr.v.ReadConfig(bytes.NewBuffer(contents)); err != nil {
+		return output, mgr.v, err
+	}
+
+	if wasNotEncrypted {
+		if err = mgr.WriteConfig(); err != nil {
+			return output, nil, err
+		}
 	}
 
 	return mgr.masterpass, mgr.v, nil
 }
 
-func decryptConfig(masterpass string, cfgFile string) (decrypted bool, err error) {
-	contents, err := ioutil.ReadFile(cfgFile)
+func (mgr ConfigManager) decryptConfig(masterpass string, cfgFile string) (contents []byte, err error) {
+	contents, err = ioutil.ReadFile(cfgFile)
 	if err != nil {
-		return decrypted, err
+		return contents, err
 	}
 
 	passkey, err := crypto.GenerateKeyFromPassword([]byte(masterpass))
 	if err != nil {
-		return decrypted, err
+		return contents, err
 	}
 
-	contents, err = crypto.CBCDecrypt(passkey, contents)
+	plaintext, err := crypto.CBCDecrypt(passkey, contents)
 	if err != nil && err.Error() == "Padding incorrect" {
-		return decrypted, fmt.Errorf("incorrect master password")
-	} else if err != nil && err.Error() == "ciphertext is not a multiple of the block size" {
-		fmt.Println("Config wasn't encrypted.")
-		return true, nil
+		return contents, fmt.Errorf("incorrect master password")
+	} else if err != nil {
+		return contents, err
 	}
+
+	return plaintext, nil
+}
+
+func (mgr ConfigManager) DecryptConfig() error {
+	if err := mgr.v.WriteConfig(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (mgr ConfigManager) WriteConfig() (err error) {
+	if err := mgr.v.WriteConfigAs(*mgr.cfgFile); err != nil {
+		return err
+	}
+
+	contents, err := ioutil.ReadFile(mgr.v.ConfigFileUsed())
 	if err != nil {
-		return decrypted, err
+		return err
 	}
 
-	if err = ioutil.WriteFile(cfgFile, contents, 0600); err != nil {
-		return decrypted, err
+	keypass, err := crypto.GenerateKeyFromPassword([]byte(mgr.masterpass))
+	if err != nil {
+		return err
 	}
 
-	return true, nil
-}
-
-func (mgr *ConfigManager) DecryptConfig() {
-	mgr.decrypt = true
-}
-
-func (mgr *ConfigManager) CloseConfig() {
-	if !mgr.decrypt && mgr.decrypted {
-		contents, err := ioutil.ReadFile(mgr.v.ConfigFileUsed())
-		if os.IsNotExist(err) {
-			return
-		}
-
-		keypass, err := crypto.GenerateKeyFromPassword([]byte(mgr.masterpass))
-		if err != nil {
-			panic(err)
-		}
-
-		contents, err = crypto.CBCEncrypt(keypass, contents)
-		if err != nil {
-			panic(err)
-		}
-
-		err = ioutil.WriteFile(mgr.v.ConfigFileUsed(), contents, 0600)
-		if err != nil {
-			panic(err)
-		}
-
-		return
+	contents, err = crypto.CBCEncrypt(keypass, contents)
+	if err != nil {
+		return err
 	}
 
-	if mgr.decrypt {
-		fmt.Println("Decrypting config file. It will auto-encrypt when you next run spc.")
+	err = ioutil.WriteFile(mgr.v.ConfigFileUsed(), contents, 0600)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }

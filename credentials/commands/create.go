@@ -65,7 +65,7 @@ password.`,
 			check(survey.Ask(mdqs, &ci.MetadataInput))
 			check(survey.Ask(cqs, &ci))
 
-			key, err := hex.DecodeString(cfg.GetString(KeyPrivateKey))
+			key, err := hex.DecodeString(cfg.GetString(clitypes.KeyPrivateKey))
 			check(err)
 
 			keypass, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))

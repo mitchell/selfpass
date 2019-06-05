@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/mitchell/selfpass/cli/types"
@@ -16,7 +18,9 @@ func makeDecryptCfg(repo types.ConfigRepo) *cobra.Command {
 			_, _, err := repo.OpenConfig()
 			check(err)
 
-			repo.DecryptConfig()
+			check(repo.DecryptConfig())
+
+			fmt.Println("Config decrypted. It will automatically encrypt next run of spc.")
 		},
 	}
 

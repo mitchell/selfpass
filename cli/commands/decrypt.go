@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mitchell/selfpass/cli/types"
-	"github.com/mitchell/selfpass/credentials/commands"
 	"github.com/mitchell/selfpass/crypto"
 )
 
@@ -35,7 +34,7 @@ the new file.`,
 			contents, err := ioutil.ReadFile(file)
 			check(err)
 
-			key, err := hex.DecodeString(cfg.GetString(commands.KeyPrivateKey))
+			key, err := hex.DecodeString(cfg.GetString(types.KeyPrivateKey))
 			check(err)
 
 			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))

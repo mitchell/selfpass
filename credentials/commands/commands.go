@@ -16,5 +16,3 @@ func check(err error) {
 		os.Exit(1)
 	}
 }
-
-const KeyPrivateKey = "private_key"

@@ -26,8 +26,6 @@ can interact with the entire Selfpass API.`,
 	cfgFile := rootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.spc.toml)")
 
 	mgr := repositories.NewConfigManager(cfgFile)
-	defer mgr.CloseConfig()
-
 	clientInit := credrepos.NewCredentialServiceClient
 
 	rootCmd.AddCommand(makeInit(mgr))
@@ -47,7 +45,7 @@ func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialClient
 		_, cfg, err := repo.OpenConfig()
 		check(err)
 
-		connConfig := cfg.GetStringMapString(keyConnConfig)
+		connConfig := cfg.GetStringMapString(types.KeyConnConfig)
 
 		client, err := initClient(
 			ctx,
@@ -68,5 +66,3 @@ func check(err error) {
 		os.Exit(1)
 	}
 }
-
-const keyConnConfig = "connection"
