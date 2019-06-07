@@ -28,6 +28,10 @@ func NewCredentialServiceClient(ctx context.Context, target, ca, cert, key strin
 	creds := credentials.NewTLS(&tls.Config{
 		RootCAs:      capool,
 		Certificates: []tls.Certificate{keypair},
+		MinVersion:   tls.VersionTLS12,
+		CurvePreferences: []tls.CurveID{
+			tls.CurveP256,
+		},
 	})
 
 	conn, err := grpc.DialContext(ctx, target, grpc.WithTransportCredentials(creds), grpc.WithBlock())

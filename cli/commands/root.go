@@ -36,6 +36,7 @@ can interact with the entire Selfpass API.`,
 	rootCmd.AddCommand(commands.MakeCreate(mgr, makeInitClient(mgr, clientInit)))
 	rootCmd.AddCommand(commands.MakeGet(mgr, makeInitClient(mgr, clientInit)))
 	rootCmd.AddCommand(commands.MakeDelete(makeInitClient(mgr, clientInit)))
+	rootCmd.AddCommand(commands.MakeCBCtoGCM(mgr, makeInitClient(mgr, clientInit)))
 
 	check(rootCmd.Execute())
 }

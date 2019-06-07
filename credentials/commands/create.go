@@ -99,7 +99,7 @@ password.`,
 				}
 			}
 
-			cipherpass, err := crypto.CBCEncrypt(keypass, []byte(ci.Password))
+			cipherpass, err := crypto.GCMEncrypt(keypass, []byte(ci.Password))
 			check(err)
 
 			ci.Password = base64.StdEncoding.EncodeToString(cipherpass)
@@ -113,7 +113,7 @@ password.`,
 				prompt := &survey.Password{Message: "OTP secret:"}
 				check(survey.AskOne(prompt, &secret, nil))
 
-				ciphersecret, err := crypto.CBCEncrypt(keypass, []byte(secret))
+				ciphersecret, err := crypto.GCMEncrypt(keypass, []byte(secret))
 				check(err)
 
 				ci.OTPSecret = base64.StdEncoding.EncodeToString(ciphersecret)

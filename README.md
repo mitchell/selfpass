@@ -10,8 +10,8 @@ API using mutual TLS encryption, backed by Redis and Docker. It is also capable 
 a semi-automated fashion locally and to GCP thanks to Docker.
 
 In addition to the service there is `spc` (**s**elf**p**ass **C**LI), which is a fully fledged *selfpass* client
-capable of interacting with the whole selfpass API and creating AES-CBC encrypted credentials using
-a *private key* and *master password*. All of which is done using mutual TLS and an AES-CBC
+capable of interacting with the whole selfpass API and creating AES-GCM encrypted credentials using
+a *private key* and *master password*. All of which is done using mutual TLS and an AES-GCM
 encrypted config.
 
 #### Service Roadmap
@@ -31,8 +31,8 @@ encrypted config.
 | Support credentials CRUD via gRPC.                                     | 80%      | TODO: Update |
 | Support mutual TLS.                                                    | 100%     |              |
 | Support storage of certs, PK, and host in AES-CBC encrypted config.    | 100%     |              |
-| Support AES-CBC encryption of passes and OTP secrets, using MP and PK. | 100%     |              |
-| Support AES-CBC encryption of local files, using MP and PK.            | 100%     |              |
+| Support AES-GCM encryption of passes and OTP secrets, using MP and PK. | 100%     |              |
+| Support AES-GCM encryption of local files, using MP and PK.            | 100%     |              |
 
 
 #### Unplanned Goals

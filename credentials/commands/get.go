@@ -121,7 +121,7 @@ decrypting password.`,
 				passbytes, err := base64.StdEncoding.DecodeString(cred.Password)
 				check(err)
 
-				plainpass, err := crypto.CBCDecrypt(passkey, passbytes)
+				plainpass, err := crypto.GCMDecrypt(passkey, passbytes)
 
 				check(clipboard.WriteAll(string(plainpass)))
 
@@ -137,7 +137,7 @@ decrypting password.`,
 					secretbytes, err := base64.StdEncoding.DecodeString(cred.OTPSecret)
 					check(err)
 
-					plainsecret, err := crypto.CBCDecrypt(passkey, secretbytes)
+					plainsecret, err := crypto.GCMDecrypt(passkey, secretbytes)
 
 					otp, err := totp.GenerateCode(string(plainsecret), time.Now())
 					check(err)

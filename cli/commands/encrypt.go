@@ -36,7 +36,7 @@ new file.`,
 			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))
 			check(err)
 
-			contents, err = crypto.CBCEncrypt(passkey, contents)
+			contents, err = crypto.GCMEncrypt(passkey, contents)
 			check(err)
 
 			check(ioutil.WriteFile(fileEnc, contents, 0600))

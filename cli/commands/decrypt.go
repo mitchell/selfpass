@@ -40,7 +40,7 @@ the new file.`,
 			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))
 			check(err)
 
-			contents, err = crypto.CBCDecrypt(passkey, contents)
+			contents, err = crypto.GCMDecrypt(passkey, contents)
 			check(err)
 
 			check(ioutil.WriteFile(fileout, contents, 0600))

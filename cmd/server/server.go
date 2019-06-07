@@ -47,9 +47,14 @@ func main() {
 	caPool.AppendCertsFromPEM([]byte(ca))
 
 	creds := credentials.NewTLS(&tls.Config{
-		Certificates: []tls.Certificate{keypair},
-		ClientCAs:    caPool,
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates:             []tls.Certificate{keypair},
+		ClientCAs:                caPool,
+		ClientAuth:               tls.RequireAndVerifyClientCert,
+		MinVersion:               tls.VersionTLS12,
+		PreferServerCipherSuites: true,
+		CurvePreferences: []tls.CurveID{
+			tls.CurveP256,
+		},
 	})
 
 	db, err := repositories.NewRedisConn("tcp", "redis:6379", 2)

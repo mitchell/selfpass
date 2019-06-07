@@ -51,7 +51,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	mgr.cfgFile = &cfg
 
 	var contents []byte
-	var wasNotEncrypted bool
+	var cipherAuthFailed bool
 
 	if _, err := os.Open(cfg); os.IsNotExist(err) {
 		return output, mgr.v, fmt.Errorf("no config found, run 'init' command")
@@ -62,22 +62,22 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 		return output, nil, err
 	}
 
-	contents, err = mgr.decryptConfig(mgr.masterpass, cfg)
-	if err != nil && err.Error() == "ciphertext is not a multiple of the block size" {
-		fmt.Println("Config wasn't encrypted.")
-		wasNotEncrypted = true
+	contents, err = decryptConfig(mgr.masterpass, cfg)
+	if err != nil && err.Error() == "cipher: message authentication failed" {
+		cipherAuthFailed = true
 	} else if err != nil {
 		return output, nil, err
 	}
 
-	// v.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err = mgr.v.ReadConfig(bytes.NewBuffer(contents)); err != nil {
-		return output, mgr.v, err
+	if err = mgr.v.ReadConfig(bytes.NewBuffer(contents)); err != nil && err.Error() == "While parsing config: (1, 1): unexpected token" {
+		return output, nil, fmt.Errorf("incorrect master password")
+	} else if err != nil {
+		return output, nil, err
 	}
 
-	if wasNotEncrypted {
+	if cipherAuthFailed {
+		fmt.Println("Config wasn't encrypted, or has been compromised.")
+
 		if err = mgr.WriteConfig(); err != nil {
 			return output, nil, err
 		}
@@ -86,7 +86,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	return mgr.masterpass, mgr.v, nil
 }
 
-func (mgr ConfigManager) decryptConfig(masterpass string, cfgFile string) (contents []byte, err error) {
+func decryptConfig(masterpass string, cfgFile string) (contents []byte, err error) {
 	contents, err = ioutil.ReadFile(cfgFile)
 	if err != nil {
 		return contents, err
@@ -97,10 +97,8 @@ func (mgr ConfigManager) decryptConfig(masterpass string, cfgFile string) (conte
 		return contents, err
 	}
 
-	plaintext, err := crypto.CBCDecrypt(passkey, contents)
-	if err != nil && err.Error() == "Padding incorrect" {
-		return contents, fmt.Errorf("incorrect master password")
-	} else if err != nil {
+	plaintext, err := crypto.GCMDecrypt(passkey, contents)
+	if err != nil {
 		return contents, err
 	}
 
@@ -130,7 +128,7 @@ func (mgr ConfigManager) WriteConfig() (err error) {
 		return err
 	}
 
-	contents, err = crypto.CBCEncrypt(keypass, contents)
+	contents, err = crypto.GCMEncrypt(keypass, contents)
 	if err != nil {
 		return err
 	}
