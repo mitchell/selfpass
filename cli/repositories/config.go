@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -69,7 +70,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 		return output, nil, err
 	}
 
-	if err = mgr.v.ReadConfig(bytes.NewBuffer(contents)); err != nil && err.Error() == "While parsing config: (1, 1): unexpected token" {
+	if err = mgr.v.ReadConfig(bytes.NewBuffer(contents)); err != nil && strings.HasPrefix(err.Error(), "While parsing config") {
 		return output, nil, fmt.Errorf("incorrect master password")
 	} else if err != nil {
 		return output, nil, err

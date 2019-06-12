@@ -22,7 +22,7 @@ func MakeList(initClient CredentialClientInit) *cobra.Command {
 includes almost all the information but the most sensitive.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 			defer cancel()
 
 			mdch, errch := initClient(ctx).GetAllMetadata(ctx, sourceHost)
@@ -34,7 +34,7 @@ includes almost all the information but the most sensitive.`,
 			for count := 0; ; count++ {
 				select {
 				case <-ctx.Done():
-					check(fmt.Errorf("context timeout"))
+					check(ctx.Err())
 
 				case err := <-errch:
 					check(err)

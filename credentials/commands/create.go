@@ -130,7 +130,7 @@ password.`,
 				}
 			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*25)
 			defer cancel()
 
 			c, err := initClient(ctx).Create(ctx, ci)

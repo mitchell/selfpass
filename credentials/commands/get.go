@@ -26,12 +26,15 @@ func MakeGet(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.C
 decrypting password.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()
 
 			client := initClient(ctx)
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
+
+			ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
 
 			mdch, errch := client.GetAllMetadata(ctx, "")
 			mds := map[string][]types.Metadata{}
@@ -42,7 +45,7 @@ decrypting password.`,
 			for count := 0; ; count++ {
 				select {
 				case <-ctx.Done():
-					check(fmt.Errorf("context timeout"))
+					check(ctx.Err())
 
 				case err := <-errch:
 					check(err)
