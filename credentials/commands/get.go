@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -14,7 +13,6 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	clitypes "github.com/mitchell/selfpass/cli/types"
-	"github.com/mitchell/selfpass/credentials/types"
 	"github.com/mitchell/selfpass/crypto"
 )
 
@@ -26,6 +24,12 @@ func MakeGet(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.C
 decrypting password.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			var (
+				copyPass bool
+				cleancb  bool
+				prompt   survey.Prompt
+			)
+
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 			defer cancel()
 
@@ -33,76 +37,7 @@ decrypting password.`,
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
 
-			ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			mdch, errch := client.GetAllMetadata(ctx, "")
-			mds := map[string][]types.Metadata{}
-
-			fmt.Println()
-
-		receive:
-			for count := 0; ; count++ {
-				select {
-				case <-ctx.Done():
-					check(ctx.Err())
-
-				case err := <-errch:
-					check(err)
-
-				case md, ok := <-mdch:
-					if !ok {
-						break receive
-					}
-
-					mds[md.SourceHost] = append(mds[md.SourceHost], md)
-				}
-			}
-
-			sources := []string{}
-			for source := range mds {
-				sources = append(sources, source)
-			}
-
-			sort.Strings(sources)
-
-			var prompt survey.Prompt
-			prompt = &survey.Select{
-				Message:  "Source host:",
-				Options:  sources,
-				PageSize: 20,
-				VimMode:  true,
-			}
-
-			var source string
-			check(survey.AskOne(prompt, &source, nil))
-
-			keys := []string{}
-			keyIDMap := map[string]string{}
-			for _, md := range mds[source] {
-				key := md.Primary
-				if md.Tag != "" {
-					key += "-" + md.Tag
-				}
-				keys = append(keys, key)
-				keyIDMap[key] = md.ID
-			}
-
-			prompt = &survey.Select{
-				Message:  "Primary user key (and tag):",
-				Options:  keys,
-				PageSize: 20,
-				VimMode:  true,
-			}
-
-			var idKey string
-			check(survey.AskOne(prompt, &idKey, nil))
-
-			ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-
-			cred, err := client.Get(ctx, keyIDMap[idKey])
-			check(err)
+			cred := selectCredential(client)
 
 			fmt.Println(cred)
 
@@ -116,7 +51,6 @@ decrypting password.`,
 			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), key)
 			check(err)
 
-			var copyPass bool
 			prompt = &survey.Confirm{Message: "Copy password to clipboard?", Default: true}
 			check(survey.AskOne(prompt, &copyPass, nil))
 
@@ -151,7 +85,6 @@ decrypting password.`,
 				}
 			}
 
-			var cleancb bool
 			prompt = &survey.Confirm{Message: "Do you want to clear the clipboard?", Default: true}
 			check(survey.AskOne(prompt, &cleancb, nil))
 

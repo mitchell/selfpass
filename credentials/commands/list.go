@@ -31,7 +31,7 @@ includes almost all the information but the most sensitive.`,
 			fmt.Println()
 
 		receive:
-			for count := 0; ; count++ {
+			for {
 				select {
 				case <-ctx.Done():
 					check(ctx.Err())

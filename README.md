@@ -28,7 +28,7 @@ encrypted config.
 
 | Goal                                                                   | Progress | Comment      |
 | ---                                                                    | :---:    | ---          |
-| Support credentials CRUD via gRPC.                                     | 80%      | TODO: Update |
+| Support credentials CRUD via gRPC.                                     | 100%     |              |
 | Support mutual TLS.                                                    | 100%     |              |
 | Support storage of certs, PK, and host in AES-CBC encrypted config.    | 100%     |              |
 | Support AES-GCM encryption of passes and OTP secrets, using MP and PK. | 100%     |              |

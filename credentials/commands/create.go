@@ -30,6 +30,13 @@ func MakeCreate(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobr
 password.`,
 
 		Run: func(_ *cobra.Command, args []string) {
+			var (
+				otp     bool
+				cleancb bool
+				newpass bool
+				ci      types.CredentialInput
+			)
+
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
 
@@ -61,7 +68,6 @@ password.`,
 					Prompt: &survey.Input{Message: "Email:"},
 				},
 			}
-			var ci types.CredentialInput
 			check(survey.Ask(mdqs, &ci.MetadataInput))
 			check(survey.Ask(cqs, &ci))
 
@@ -71,7 +77,6 @@ password.`,
 			keypass, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))
 			check(err)
 
-			var newpass bool
 			prompt := &survey.Confirm{Message: "Do you want a random password?", Default: true}
 			check(survey.AskOne(prompt, &newpass, nil))
 
@@ -104,7 +109,6 @@ password.`,
 
 			ci.Password = base64.StdEncoding.EncodeToString(cipherpass)
 
-			var otp bool
 			prompt = &survey.Confirm{Message: "Do you have an OTP/MFA secret?", Default: true}
 			check(survey.AskOne(prompt, &otp, nil))
 
@@ -138,7 +142,6 @@ password.`,
 
 			fmt.Println(c)
 
-			var cleancb bool
 			prompt = &survey.Confirm{Message: "Do you want to clear the clipboard?", Default: true}
 			check(survey.AskOne(prompt, &cleancb, nil))
 

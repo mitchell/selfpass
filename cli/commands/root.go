@@ -34,9 +34,9 @@ can interact with the entire Selfpass API.`,
 	rootCmd.AddCommand(makeDecryptCfg(mgr))
 	rootCmd.AddCommand(commands.MakeList(makeInitClient(mgr, clientInit)))
 	rootCmd.AddCommand(commands.MakeCreate(mgr, makeInitClient(mgr, clientInit)))
+	rootCmd.AddCommand(commands.MakeUpdate(mgr, makeInitClient(mgr, clientInit)))
 	rootCmd.AddCommand(commands.MakeGet(mgr, makeInitClient(mgr, clientInit)))
 	rootCmd.AddCommand(commands.MakeDelete(makeInitClient(mgr, clientInit)))
-	rootCmd.AddCommand(commands.MakeCBCtoGCM(mgr, makeInitClient(mgr, clientInit)))
 
 	check(rootCmd.Execute())
 }
