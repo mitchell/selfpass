@@ -71,6 +71,7 @@ install-spc:
 
 gen-protoc:
 	protoc --go_out=plugins=grpc:. \
+		--dart_out=grpc:. \
 		./credentials/protobuf/service.proto
 
 gen-csr-json:

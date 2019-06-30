@@ -16,10 +16,20 @@ type Credential struct {
 }
 
 func (c Credential) String() string {
-	return fmt.Sprintf(
-		"username = %s\nemail = %s\n%s",
-		c.Username, c.Email, c.Metadata,
-	)
+	format := "%s"
+	args := []interface{}{c.Metadata}
+
+	if c.Username != "" {
+		format += "username = %s\n"
+		args = append(args, c.Username)
+	}
+
+	if c.Email != "" {
+		format += "email = %s\n"
+		args = append(args, c.Email)
+	}
+
+	return fmt.Sprintf(format, args...)
 }
 
 type CredentialInput struct {
@@ -41,10 +51,20 @@ type Metadata struct {
 }
 
 func (m Metadata) String() string {
-	return fmt.Sprintf(
-		"id = %s\nsourceHost = %s\ncreatedAt = %s\nupdatedAt = %s\nprimary = %s\nloginUrl = %s\ntag = %s\n",
-		m.ID, m.SourceHost, m.CreatedAt, m.UpdatedAt, m.Primary, m.LoginURL, m.Tag,
-	)
+	format := "id = %s\ncreatedAt = %s\nupdatedAt = %s\nsourceHost = %s\nprimary = %s\n"
+	args := []interface{}{m.ID, m.CreatedAt, m.UpdatedAt, m.SourceHost, m.Primary}
+
+	if m.LoginURL != "" {
+		format += "loginUrl = %s\n"
+		args = append(args, m.LoginURL)
+	}
+
+	if m.Tag != "" {
+		format += "tag = %s\n"
+		args = append(args, m.Tag)
+	}
+
+	return fmt.Sprintf(format, args...)
 }
 
 type MetadataInput struct {

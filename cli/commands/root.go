@@ -28,15 +28,17 @@ can interact with the entire Selfpass API.`,
 	mgr := repositories.NewConfigManager(cfgFile)
 	clientInit := credrepos.NewCredentialServiceClient
 
-	rootCmd.AddCommand(makeInit(mgr))
-	rootCmd.AddCommand(makeEncrypt(mgr))
-	rootCmd.AddCommand(makeDecrypt(mgr))
-	rootCmd.AddCommand(makeDecryptCfg(mgr))
-	rootCmd.AddCommand(commands.MakeList(makeInitClient(mgr, clientInit)))
-	rootCmd.AddCommand(commands.MakeCreate(mgr, makeInitClient(mgr, clientInit)))
-	rootCmd.AddCommand(commands.MakeUpdate(mgr, makeInitClient(mgr, clientInit)))
-	rootCmd.AddCommand(commands.MakeGet(mgr, makeInitClient(mgr, clientInit)))
-	rootCmd.AddCommand(commands.MakeDelete(makeInitClient(mgr, clientInit)))
+	rootCmd.AddCommand(
+		makeInit(mgr),
+		makeEncrypt(mgr),
+		makeDecrypt(mgr),
+		makeDecryptCfg(mgr),
+		commands.MakeList(makeInitClient(mgr, clientInit)),
+		commands.MakeCreate(mgr, makeInitClient(mgr, clientInit)),
+		commands.MakeUpdate(mgr, makeInitClient(mgr, clientInit)),
+		commands.MakeGet(mgr, makeInitClient(mgr, clientInit)),
+		commands.MakeDelete(makeInitClient(mgr, clientInit)),
+	)
 
 	check(rootCmd.Execute())
 }
