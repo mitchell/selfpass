@@ -28,6 +28,9 @@ dependencies:
 
   provider: ^3.0.0
 
+  crypt: ^1.0.7
+  flutter_secure_storage: ^3.2.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
