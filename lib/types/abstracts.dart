@@ -21,4 +21,6 @@ abstract class ConfigRepo {
 
   Future<void> setConnectionConfig(ConnectionConfig config);
   Future<ConnectionConfig> get connectionConfig;
+
+  Future<void> deleteAll();
 }

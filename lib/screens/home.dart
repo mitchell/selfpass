@@ -13,20 +13,21 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   CredentialsRepo _client;
+  ConfigRepo _config;
   Future<List<Metadata>> _metadatas;
 
   @override
   didChangeDependencies() {
     super.didChangeDependencies();
+
+    _config = Provider.of<ConfigRepo>(context);
+
     _client = Provider.of<CredentialsRepo>(context);
+    _metadatas = _client.getAllMetadata('').toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_metadatas == null) {
-      _metadatas = _client.getAllMetadata('').toList();
-    }
-
     return CupertinoPageScaffold(
       child: FutureBuilder<List<Metadata>>(
         future: _metadatas,
@@ -35,9 +36,21 @@ class _HomeState extends State<Home> {
             (snapshot.connectionState == ConnectionState.done)
                 ? TappableTextList(
                     tappableText: _buildTappableText(context, snapshot.data))
-                : Container(),
+                : Center(child: CupertinoActivityIndicator()),
       ),
-      navigationBar: CupertinoNavigationBar(),
+      navigationBar: CupertinoNavigationBar(
+        leading: GestureDetector(
+          child: Align(
+              child: Text('Lock',
+                  style: TextStyle(color: CupertinoColors.destructiveRed)),
+              alignment: Alignment(-0.9, 0)),
+          onTap: _makeLockOnTapHandler(context),
+        ),
+        trailing: GestureDetector(
+          child: Icon(CupertinoIcons.gear),
+          onTap: _makeConfigOnTapHandler(context),
+        ),
+      ),
     );
   }
 
@@ -68,5 +81,14 @@ class _HomeState extends State<Home> {
         tappableText[key] = handleOnTap(value));
 
     return tappableText;
+  }
+
+  GestureTapCallback _makeLockOnTapHandler(BuildContext context) {
+    return () => Navigator.of(context).pushReplacementNamed('/');
+  }
+
+  GestureTapCallback _makeConfigOnTapHandler(BuildContext context) {
+    return () async => Navigator.of(context)
+        .pushNamed('/config', arguments: await _config.connectionConfig);
   }
 }

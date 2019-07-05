@@ -54,8 +54,18 @@ class Config implements ConfigRepo {
 
   Future<ConnectionConfig> get connectionConfig async {
     _checkIfPasswordMatched();
-    return ConnectionConfig.fromJson(
-        json.decode(await _storage.read(key: _keyConnectionConfig)));
+    final connConfig = await _storage.read(key: _keyConnectionConfig);
+
+    if (connConfig == null) {
+      return null;
+    }
+
+    return ConnectionConfig.fromJson(json.decode(connConfig));
+  }
+
+  Future<void> deleteAll() {
+    _checkIfPasswordMatched();
+    return _storage.deleteAll();
   }
 
   void _checkIfPasswordMatched() {
