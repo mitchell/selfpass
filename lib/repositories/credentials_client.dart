@@ -12,6 +12,7 @@ import '../types/connection_config.dart';
 import '../types/credential.dart';
 
 class CredentialsClient implements CredentialsRepo {
+  static CredentialsClient _cached;
   grpc.CredentialServiceClient _client;
 
   CredentialsClient(ConnectionConfig config) {
@@ -31,6 +32,9 @@ class CredentialsClient implements CredentialsRepo {
       ),
     ));
   }
+
+  factory CredentialsClient.cached({ConnectionConfig config}) =>
+      _cached == null ? _cached = CredentialsClient(config) : _cached;
 
   Stream<Metadata> getAllMetadata(String sourceHost) {
     final request = grpc.GetAllMetadataRequest();

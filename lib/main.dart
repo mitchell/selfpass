@@ -5,11 +5,13 @@ import 'repositories/credentials_client.dart';
 import 'repositories/config.dart' as repo;
 
 import 'screens/authentication.dart';
+import 'screens/credential.dart';
 import 'screens/credentials.dart';
 import 'screens/config.dart';
 import 'screens/home.dart';
 
 import 'types/abstracts.dart';
+import 'types/screen_arguments.dart';
 
 void main() => runApp(Selfpass());
 
@@ -31,23 +33,37 @@ class Selfpass extends StatelessWidget {
               break;
 
             case '/home':
-              title = 'Credential Hosts';
+              title = 'Hosts';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        CredentialsClient(settings.arguments),
+                        CredentialsClient.cached(config: settings.arguments),
                     child: Home(),
                   );
               break;
 
             case '/credentials':
               title = 'Credentials';
-              builder =
-                  (BuildContext context) => Credentials(settings.arguments);
+              builder = (BuildContext context) => Provider<CredentialsRepo>(
+                    builder: (BuildContext context) =>
+                        CredentialsClient.cached(),
+                    child: Credentials(settings.arguments),
+                  );
+              break;
+
+            case '/credential':
+              title = 'Credential';
+              builder = (BuildContext context) => Provider<CredentialsRepo>(
+                    builder: (BuildContext context) =>
+                        CredentialsClient.cached(),
+                    child: Credential(settings.arguments),
+                  );
               break;
 
             case '/config':
+              final ConfigScreenArguments arguments = settings.arguments;
               title = 'Configuration';
-              builder = (BuildContext context) => Config(settings.arguments);
+              builder = (BuildContext context) =>
+                  Config(arguments.connectionConfig, arguments.privateKey);
               break;
           }
 

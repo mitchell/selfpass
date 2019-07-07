@@ -8,11 +8,13 @@ import '../widgets/text_field.dart';
 
 class Config extends StatefulWidget {
   final ConnectionConfig connectionConfig;
+  final String privateKey;
 
-  const Config(this.connectionConfig, {Key key}) : super(key: key);
+  const Config(this.connectionConfig, this.privateKey, {Key key})
+      : super(key: key);
 
   @override
-  State createState() => _ConfigState(this.connectionConfig);
+  State createState() => _ConfigState(this.connectionConfig, this.privateKey);
 }
 
 class _ConfigState extends State<Config> {
@@ -20,10 +22,12 @@ class _ConfigState extends State<Config> {
   TextEditingController _caCertController;
   TextEditingController _certController;
   TextEditingController _privateCertController;
+  TextEditingController _privateKeyController;
   ConnectionConfig _connectionConfig;
+  String _privateKey;
   ConfigRepo _config;
 
-  _ConfigState(this._connectionConfig) {
+  _ConfigState(this._connectionConfig, this._privateKey) {
     if (_connectionConfig == null) {
       _connectionConfig = ConnectionConfig();
     }
@@ -35,6 +39,8 @@ class _ConfigState extends State<Config> {
         TextEditingController(text: _connectionConfig.caCertificate);
     _privateCertController =
         TextEditingController(text: _connectionConfig.privateCertificate);
+
+    _privateKeyController = TextEditingController(text: _privateKey);
   }
 
   @override
@@ -57,22 +63,26 @@ class _ConfigState extends State<Config> {
               ),
             ),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 50.0),
-        child: Column(children: [
-          Spacer(flex: 3),
-          Flexible(child: Text('Host:')),
-          Flexible(child: TextField(maxLines: 1, controller: _hostController)),
-          Flexible(child: Text('CA certificate:')),
-          Flexible(
-              child: TextField(maxLines: 3, controller: _caCertController)),
-          Flexible(child: Text('Client certificate:')),
-          Flexible(child: TextField(maxLines: 3, controller: _certController)),
-          Flexible(child: Text('Private certificate:')),
-          Flexible(
-              child:
-                  TextField(maxLines: 3, controller: _privateCertController)),
+        margin: const EdgeInsets.symmetric(horizontal: 30),
+        child: ListView(children: [
+          Container(margin: EdgeInsets.only(top: 10), child: Text('Host:')),
+          TextField(maxLines: 1, controller: _hostController),
+          Container(
+              margin: EdgeInsets.only(top: 5), child: Text('Private key:')),
+          TextField(maxLines: 1, controller: _privateKeyController),
+          Container(
+              margin: EdgeInsets.only(top: 5), child: Text('CA certificate:')),
+          TextField(maxLines: 5, controller: _caCertController),
+          Container(
+              margin: EdgeInsets.only(top: 5),
+              child: Text('Client certificate:')),
+          TextField(maxLines: 5, controller: _certController),
+          Container(
+              margin: EdgeInsets.only(top: 5),
+              child: Text('Private certificate:')),
+          TextField(maxLines: 5, controller: _privateCertController),
           CupertinoButton(
-              child: Text('Save'), onPressed: _makeSaveOnPressed(context))
+              child: Text('Save'), onPressed: _makeSaveOnPressed(context)),
         ]),
       ),
     );
@@ -116,6 +126,7 @@ class _ConfigState extends State<Config> {
       );
 
       await _config.setConnectionConfig(connConfig);
+      await _config.setPrivateKey(_privateKeyController.text);
 
       Navigator.of(context)
           .pushReplacementNamed('/home', arguments: connConfig);

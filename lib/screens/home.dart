@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../types/abstracts.dart';
 import '../types/credential.dart';
+import '../types/screen_arguments.dart';
 
 import '../widgets/tappable_text_list.dart';
 
@@ -72,7 +73,7 @@ class _HomeState extends State<Home> {
       }
     }
 
-    final handleOnTap = (List<Metadata> metadatas) => () =>
+    final handleOnTap = (List<Metadata> metadatas) => () async =>
         Navigator.of(context).pushNamed('/credentials', arguments: metadatas);
 
     final Map<String, GestureTapCallback> tappableText = {};
@@ -88,7 +89,8 @@ class _HomeState extends State<Home> {
   }
 
   GestureTapCallback _makeConfigOnTapHandler(BuildContext context) {
-    return () async => Navigator.of(context)
-        .pushNamed('/config', arguments: await _config.connectionConfig);
+    return () async => Navigator.of(context).pushNamed('/config',
+        arguments: ConfigScreenArguments(
+            await _config.connectionConfig, await _config.privateKey));
   }
 }

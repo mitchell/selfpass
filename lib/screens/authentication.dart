@@ -48,6 +48,7 @@ class _AuthenticationState extends State<Authentication> {
       const Flexible(child: Text('Master password:')),
       Flexible(
         child: TextField(
+          maxLines: 1,
           obscure: true,
           autofocus: true,
           controller: _passwordController,
@@ -59,6 +60,7 @@ class _AuthenticationState extends State<Authentication> {
       children.add(const Flexible(child: Text('Re-enter password:')));
       children.add(Flexible(
         child: TextField(
+          maxLines: 1,
           obscure: true,
           controller: _confirmController,
         ),
@@ -85,7 +87,7 @@ class _AuthenticationState extends State<Authentication> {
 
     children.add(CupertinoButton(
       child: Text('Enter'),
-      onPressed: _buildSubmitPressedBuilder(context),
+      onPressed: _buildEnterPressedBuilder(context),
     ));
 
     if (_passesDontMatch) {
@@ -99,7 +101,7 @@ class _AuthenticationState extends State<Authentication> {
     return children;
   }
 
-  VoidCallback _buildSubmitPressedBuilder(BuildContext context) {
+  VoidCallback _buildEnterPressedBuilder(BuildContext context) {
     return () async {
       if (await _passwordIsSet) {
         if (await _config.matchesPasswordHash(_passwordController.text)) {

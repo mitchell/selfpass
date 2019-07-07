@@ -7,6 +7,8 @@ typedef OnSubmittedBuilder = ValueChanged<String> Function(
 class TextField extends StatelessWidget {
   final OnSubmittedBuilder onSubmittedBuilder;
   final TextEditingController controller;
+  final Widget prefix;
+  final Widget suffix;
   final bool obscure;
   final bool autofocus;
   final bool autocorrect;
@@ -21,6 +23,8 @@ class TextField extends StatelessWidget {
     this.minLines,
     this.maxLines,
     this.autocorrect = false,
+    this.prefix,
+    this.suffix,
   });
 
   @override
@@ -43,6 +47,8 @@ class TextField extends StatelessWidget {
         autocorrect: autocorrect,
         minLines: minLines,
         maxLines: maxLines,
+        prefix: prefix,
+        suffix: suffix,
       ),
     );
   }
