@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -34,11 +33,8 @@ the new file.`,
 			contents, err := ioutil.ReadFile(file)
 			check(err)
 
-			key, err := hex.DecodeString(cfg.GetString(types.KeyPrivateKey))
-			check(err)
-
-			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))
-			check(err)
+			key := cfg.GetString(types.KeyPrivateKey)
+			passkey := crypto.GeneratePBKDF2Key([]byte(masterpass), []byte(key))
 
 			contents, err = crypto.GCMDecrypt(passkey, contents)
 			check(err)

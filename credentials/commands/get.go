@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -45,11 +44,8 @@ decrypting password.`,
 
 			fmt.Println("Wrote primary user key to clipboard.")
 
-			key, err := hex.DecodeString(cfg.GetString(clitypes.KeyPrivateKey))
-			check(err)
-
-			passkey, err := crypto.CombinePasswordAndKey([]byte(masterpass), key)
-			check(err)
+			key := cfg.GetString(clitypes.KeyPrivateKey)
+			passkey := crypto.GeneratePBKDF2Key([]byte(masterpass), []byte(key))
 
 			prompt = &survey.Confirm{Message: "Copy password to clipboard?", Default: true}
 			check(survey.AskOne(prompt, &copyPass, nil))
@@ -58,7 +54,7 @@ decrypting password.`,
 				passbytes, err := base64.StdEncoding.DecodeString(cred.Password)
 				check(err)
 
-				plainpass, err := crypto.GCMDecrypt(passkey, passbytes)
+				plainpass, err := crypto.CBCDecrypt(passkey, passbytes)
 
 				check(clipboard.WriteAll(string(plainpass)))
 
@@ -74,7 +70,7 @@ decrypting password.`,
 					secretbytes, err := base64.StdEncoding.DecodeString(cred.OTPSecret)
 					check(err)
 
-					plainsecret, err := crypto.GCMDecrypt(passkey, secretbytes)
+					plainsecret, err := crypto.CBCDecrypt(passkey, secretbytes)
 
 					otp, err := totp.GenerateCode(string(plainsecret), time.Now())
 					check(err)

@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"encoding/base64"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"time"
@@ -71,11 +70,8 @@ password.`,
 			check(survey.Ask(mdqs, &ci.MetadataInput))
 			check(survey.Ask(cqs, &ci))
 
-			key, err := hex.DecodeString(cfg.GetString(clitypes.KeyPrivateKey))
-			check(err)
-
-			keypass, err := crypto.CombinePasswordAndKey([]byte(masterpass), []byte(key))
-			check(err)
+			key := cfg.GetString(clitypes.KeyPrivateKey)
+			keypass := crypto.GeneratePBKDF2Key([]byte(masterpass), []byte(key))
 
 			prompt := &survey.Confirm{Message: "Do you want a random password?", Default: true}
 			check(survey.AskOne(prompt, &newpass, nil))
@@ -104,7 +100,7 @@ password.`,
 				}
 			}
 
-			cipherpass, err := crypto.GCMEncrypt(keypass, []byte(ci.Password))
+			cipherpass, err := crypto.CBCEncrypt(keypass, []byte(ci.Password))
 			check(err)
 
 			ci.Password = base64.StdEncoding.EncodeToString(cipherpass)
@@ -117,7 +113,7 @@ password.`,
 				prompt := &survey.Password{Message: "OTP secret:"}
 				check(survey.AskOne(prompt, &secret, nil))
 
-				ciphersecret, err := crypto.GCMEncrypt(keypass, []byte(secret))
+				ciphersecret, err := crypto.CBCEncrypt(keypass, []byte(secret))
 				check(err)
 
 				ci.OTPSecret = base64.StdEncoding.EncodeToString(ciphersecret)

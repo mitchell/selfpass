@@ -38,6 +38,7 @@ can interact with the entire Selfpass API.`,
 		commands.MakeUpdate(mgr, makeInitClient(mgr, clientInit)),
 		commands.MakeGet(mgr, makeInitClient(mgr, clientInit)),
 		commands.MakeDelete(makeInitClient(mgr, clientInit)),
+		commands.MakeGCMToCBC(mgr, makeInitClient(mgr, clientInit)),
 	)
 
 	check(rootCmd.Execute())

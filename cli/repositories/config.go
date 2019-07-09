@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"bytes"
+	"crypto/rand"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +13,7 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	"github.com/mitchell/selfpass/cli/types"
 	"github.com/mitchell/selfpass/crypto"
 )
 
@@ -52,7 +55,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	mgr.cfgFile = &cfg
 
 	var contents []byte
-	var cipherAuthFailed bool
+	var configDecrypted bool
 
 	if _, err := os.Open(cfg); os.IsNotExist(err) {
 		return output, mgr.v, fmt.Errorf("no config found, run 'init' command")
@@ -64,8 +67,8 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	}
 
 	contents, err = decryptConfig(mgr.masterpass, cfg)
-	if err != nil && err.Error() == "cipher: message authentication failed" {
-		cipherAuthFailed = true
+	if err != nil && err == errConfigDecrypted {
+		configDecrypted = true
 	} else if err != nil {
 		return output, nil, err
 	}
@@ -76,7 +79,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 		return output, nil, err
 	}
 
-	if cipherAuthFailed {
+	if configDecrypted {
 		fmt.Println("Config wasn't encrypted, or has been compromised.")
 
 		if err = mgr.WriteConfig(); err != nil {
@@ -87,16 +90,22 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	return mgr.masterpass, mgr.v, nil
 }
 
+var errConfigDecrypted = errors.New("config is decrypted")
+
 func decryptConfig(masterpass string, cfgFile string) (contents []byte, err error) {
 	contents, err = ioutil.ReadFile(cfgFile)
 	if err != nil {
 		return contents, err
 	}
 
-	passkey, err := crypto.GenerateKeyFromPassword([]byte(masterpass))
-	if err != nil {
-		return contents, err
+	if string(contents[:len(types.KeyPrivateKey)]) == types.KeyPrivateKey {
+		return contents, errConfigDecrypted
 	}
+
+	salt := contents[:saltSize]
+	contents = contents[saltSize:]
+
+	passkey := crypto.GeneratePBKDF2Key([]byte(masterpass), salt)
 
 	plaintext, err := crypto.GCMDecrypt(passkey, contents)
 	if err != nil {
@@ -124,15 +133,20 @@ func (mgr ConfigManager) WriteConfig() (err error) {
 		return err
 	}
 
-	keypass, err := crypto.GenerateKeyFromPassword([]byte(mgr.masterpass))
+	salt := make([]byte, saltSize)
+	_, err = rand.Read(salt)
 	if err != nil {
 		return err
 	}
+
+	keypass := crypto.GeneratePBKDF2Key([]byte(mgr.masterpass), salt)
 
 	contents, err = crypto.GCMEncrypt(keypass, contents)
 	if err != nil {
 		return err
 	}
+
+	contents = append(salt, contents...)
 
 	err = ioutil.WriteFile(mgr.v.ConfigFileUsed(), contents, 0600)
 	if err != nil {
@@ -141,3 +155,5 @@ func (mgr ConfigManager) WriteConfig() (err error) {
 
 	return nil
 }
+
+const saltSize = 16

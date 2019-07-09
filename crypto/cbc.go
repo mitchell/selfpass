@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cloudflare/redoctober/padding"
+	"github.com/ncw/rclone/backend/crypt/pkcs7"
 )
 
 func CBCEncrypt(key []byte, plaintext []byte) ([]byte, error) {
@@ -15,7 +15,7 @@ func CBCEncrypt(key []byte, plaintext []byte) ([]byte, error) {
 		return nil, fmt.Errorf("key is not 32 bytes")
 	}
 
-	plaintext = padding.AddPadding(plaintext)
+	plaintext = pkcs7.Pad(aes.BlockSize, plaintext)
 
 	if len(plaintext)%aes.BlockSize != 0 {
 		return nil, fmt.Errorf("plaintext is not a multiple of the block size")
@@ -64,5 +64,5 @@ func CBCDecrypt(key []byte, ciphertext []byte) ([]byte, error) {
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(ciphertext, ciphertext)
 
-	return padding.RemovePadding(ciphertext)
+	return pkcs7.Unpad(aes.BlockSize, ciphertext)
 }
