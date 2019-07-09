@@ -91,6 +91,7 @@ class _HomeState extends State<Home> {
   GestureTapCallback _makeConfigOnTapHandler(BuildContext context) {
     return () async => Navigator.of(context).pushNamed('/config',
         arguments: ConfigScreenArguments(
-            await _config.connectionConfig, await _config.privateKey));
+            connectionConfig: await _config.connectionConfig,
+            privateKey: await _config.privateKey));
   }
 }

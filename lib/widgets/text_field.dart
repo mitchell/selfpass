@@ -7,6 +7,7 @@ typedef OnSubmittedBuilder = ValueChanged<String> Function(
 class TextField extends StatelessWidget {
   final OnSubmittedBuilder onSubmittedBuilder;
   final TextEditingController controller;
+  final OverlayVisibilityMode clearButtonMode;
   final Widget prefix;
   final Widget suffix;
   final bool obscure;
@@ -25,6 +26,7 @@ class TextField extends StatelessWidget {
     this.autocorrect = false,
     this.prefix,
     this.suffix,
+    this.clearButtonMode = OverlayVisibilityMode.editing,
   });
 
   @override
@@ -36,7 +38,7 @@ class TextField extends StatelessWidget {
           border: Border.all(color: CupertinoColors.black),
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         ),
-        clearButtonMode: OverlayVisibilityMode.editing,
+        clearButtonMode: clearButtonMode,
         textAlign: TextAlign.start,
         onSubmitted: this.onSubmittedBuilder != null
             ? onSubmittedBuilder(context)

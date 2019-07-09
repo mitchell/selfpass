@@ -15,6 +15,7 @@ abstract class ConfigRepo {
   Future<void> setPrivateKey(String key);
   Future<String> get privateKey;
 
+  String get password;
   Future<void> setPassword(String password);
   Future<bool> get passwordSet;
   Future<bool> matchesPasswordHash(String password);

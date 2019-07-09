@@ -60,7 +60,9 @@ class Selfpass extends StatelessWidget {
               break;
 
             case '/config':
-              final ConfigScreenArguments arguments = settings.arguments;
+              final ConfigScreenArguments arguments = settings.arguments == null
+                  ? ConfigScreenArguments()
+                  : settings.arguments;
               title = 'Configuration';
               builder = (BuildContext context) =>
                   Config(arguments.connectionConfig, arguments.privateKey);

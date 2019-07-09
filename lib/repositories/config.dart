@@ -12,11 +12,17 @@ class Config implements ConfigRepo {
   static const _keyConnectionConfig = "connection_config";
   static const _keyPassword = "password";
   final FlutterSecureStorage _storage = FlutterSecureStorage();
-  var _passwordMatched = false;
+  bool _passwordMatched = false;
+  String _password;
+
+  String get password {
+    _checkIfPasswordMatched();
+    return _password;
+  }
 
   Future<void> setPrivateKey(String key) {
     _checkIfPasswordMatched();
-    return _storage.write(key: _keyPrivateKey, value: key);
+    return _storage.write(key: _keyPrivateKey, value: key.replaceAll('-', ''));
   }
 
   Future<String> get privateKey {
@@ -26,6 +32,7 @@ class Config implements ConfigRepo {
 
   Future<void> setPassword(String password) {
     _checkIfPasswordMatched();
+    _password = password;
     return _storage.write(
         key: _keyPassword, value: crypto.hashPassword(password));
   }
@@ -42,9 +49,16 @@ class Config implements ConfigRepo {
     return false;
   }
 
-  Future<bool> matchesPasswordHash(String password) async =>
-      _passwordMatched = crypto.matchHashedPassword(
-          await _storage.read(key: _keyPassword), password);
+  Future<bool> matchesPasswordHash(String password) async {
+    _passwordMatched = crypto.matchHashedPassword(
+        await _storage.read(key: _keyPassword), password);
+
+    if (_passwordMatched) {
+      _password = password;
+    }
+
+    return _passwordMatched;
+  }
 
   Future<void> setConnectionConfig(ConnectionConfig config) {
     _checkIfPasswordMatched();

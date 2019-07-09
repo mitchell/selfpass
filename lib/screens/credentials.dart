@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../types/abstracts.dart';
 import '../types/credential.dart';
 
+import '../utils/crypto.dart' as crypto;
+
 import '../widgets/tappable_text_list.dart';
 
 class Credentials extends StatelessWidget {
@@ -20,10 +22,39 @@ class Credentials extends StatelessWidget {
   }
 
   Map<String, GestureTapCallback> _buildTappableText(BuildContext context) {
-    var makeOnTapHandler = (String id) => () async {
-          final credential =
-              await Provider.of<CredentialsRepo>(context).get(id);
-          Navigator.of(context).pushNamed('/credential', arguments: credential);
+    final makeOnTapHandler = (String id) => () async {
+          showCupertinoDialog(
+            context: context,
+            builder: (BuildContext context) => CupertinoAlertDialog(
+                content: Column(
+              children: [
+                Text('Decrypting credential...'),
+                Container(
+                    margin: EdgeInsets.only(top: 10),
+                    child: CupertinoActivityIndicator()),
+              ],
+            )),
+          );
+
+          final config = Provider.of<ConfigRepo>(context);
+          final client = Provider.of<CredentialsRepo>(context);
+
+          final Future<String> privateKey = config.privateKey;
+          final String password = config.password;
+
+          final credential = await client.get(id);
+
+          credential.password = crypto.decryptPassword(
+              password, await privateKey, credential.password);
+
+          if (credential.otpSecret != null && credential.otpSecret != '') {
+            credential.otpSecret = crypto.decryptPassword(
+                password, await privateKey, credential.otpSecret);
+          }
+
+          Navigator.of(context)
+            ..pop()
+            ..pushNamed('/credential', arguments: credential);
         };
 
     Map<String, GestureTapCallback> tappableText = {};

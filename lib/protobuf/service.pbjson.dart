@@ -29,7 +29,14 @@ const UpdateRequest$json = const {
   '1': 'UpdateRequest',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'credential', '3': 2, '4': 1, '5': 11, '6': '.selfpass.credentials.CredentialRequest', '10': 'credential'},
+    const {
+      '1': 'credential',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.selfpass.credentials.CredentialRequest',
+      '10': 'credential'
+    },
   ],
 };
 
@@ -48,8 +55,22 @@ const Metadata$json = const {
   '1': 'Metadata',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'created_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    const {
+      '1': 'created_at',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'createdAt'
+    },
+    const {
+      '1': 'updated_at',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'updatedAt'
+    },
     const {'1': 'primary', '3': 4, '4': 1, '5': 9, '10': 'primary'},
     const {'1': 'source_host', '3': 5, '4': 1, '5': 9, '10': 'sourceHost'},
     const {'1': 'login_url', '3': 6, '4': 1, '5': 9, '10': 'loginUrl'},
@@ -61,8 +82,22 @@ const Credential$json = const {
   '1': 'Credential',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
-    const {'1': 'created_at', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'createdAt'},
-    const {'1': 'updated_at', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
+    const {
+      '1': 'created_at',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'createdAt'
+    },
+    const {
+      '1': 'updated_at',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.google.protobuf.Timestamp',
+      '10': 'updatedAt'
+    },
     const {'1': 'primary', '3': 4, '4': 1, '5': 9, '10': 'primary'},
     const {'1': 'username', '3': 5, '4': 1, '5': 9, '10': 'username'},
     const {'1': 'email', '3': 6, '4': 1, '5': 9, '10': 'email'},
@@ -87,4 +122,3 @@ const CredentialRequest$json = const {
     const {'1': 'otp_secret', '3': 8, '4': 1, '5': 9, '10': 'otpSecret'},
   ],
 };
-

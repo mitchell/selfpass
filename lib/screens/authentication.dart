@@ -105,10 +105,8 @@ class _AuthenticationState extends State<Authentication> {
     return () async {
       if (await _passwordIsSet) {
         if (await _config.matchesPasswordHash(_passwordController.text)) {
-          Navigator.of(context).pushReplacementNamed(
-            '/home',
-            arguments: await _config.connectionConfig,
-          );
+          Navigator.of(context).pushReplacementNamed('/home',
+              arguments: await _config.connectionConfig);
           return;
         }
 
