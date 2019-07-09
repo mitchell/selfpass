@@ -1,0 +1,8 @@
+name: selfpass_protobuf
+
+environment:
+  sdk: ">=2.0.0 <3.0.0"
+
+dependencies:
+  protobuf: ^0.13.12
+  grpc: ^1.0.3
