@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-import 'repositories/credentials_client.dart';
-import 'repositories/config.dart' as repo;
+import 'repositories/grpc_credentials_client.dart';
+import 'repositories/secure_storage_config.dart';
 
 import 'screens/authentication.dart';
 import 'screens/credential.dart';
@@ -19,7 +19,7 @@ class Selfpass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider<ConfigRepo>(
-      builder: (BuildContext context) => repo.Config(),
+      builder: (BuildContext context) => SecureStorageConfig(),
       child: CupertinoApp(
         title: 'Selfpass',
         onGenerateRoute: (RouteSettings settings) {
@@ -36,7 +36,7 @@ class Selfpass extends StatelessWidget {
               title = 'Hosts';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        CredentialsClient.cached(config: settings.arguments),
+                        GRPCCredentialsClient.cached(config: settings.arguments),
                     child: Home(),
                   );
               break;
@@ -45,7 +45,7 @@ class Selfpass extends StatelessWidget {
               title = 'Credentials';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        CredentialsClient.cached(),
+                        GRPCCredentialsClient.cached(),
                     child: Credentials(settings.arguments),
                   );
               break;
@@ -54,7 +54,7 @@ class Selfpass extends StatelessWidget {
               title = 'Credential';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        CredentialsClient.cached(),
+                        GRPCCredentialsClient.cached(),
                     child: Credential(settings.arguments),
                   );
               break;
@@ -63,6 +63,7 @@ class Selfpass extends StatelessWidget {
               final ConfigScreenArguments arguments = settings.arguments == null
                   ? ConfigScreenArguments()
                   : settings.arguments;
+
               title = 'Configuration';
               builder = (BuildContext context) =>
                   Config(arguments.connectionConfig, arguments.privateKey);

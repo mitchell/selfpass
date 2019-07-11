@@ -22,7 +22,7 @@ class _AuthenticationState extends State<Authentication> {
   didChangeDependencies() {
     super.didChangeDependencies();
     _config = Provider.of<ConfigRepo>(context);
-    _passwordIsSet = _config.passwordSet;
+    _passwordIsSet = _config.passwordIsSet;
   }
 
   @override

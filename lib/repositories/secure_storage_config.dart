@@ -7,11 +7,13 @@ import '../types/connection_config.dart';
 
 import '../utils/crypto.dart' as crypto;
 
-class Config implements ConfigRepo {
+class SecureStorageConfig implements ConfigRepo {
   static const _keyPrivateKey = "private_key";
   static const _keyConnectionConfig = "connection_config";
   static const _keyPassword = "password";
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  final _storage = FlutterSecureStorage();
+
   bool _passwordMatched = false;
   String _password;
 
@@ -32,13 +34,15 @@ class Config implements ConfigRepo {
 
   Future<void> setPassword(String password) {
     _checkIfPasswordMatched();
+
     _password = password;
+
     return _storage.write(
         key: _keyPassword, value: crypto.hashPassword(password));
   }
 
-  Future<bool> get passwordSet async {
-    var passHash = await _storage.read(key: _keyPassword);
+  Future<bool> get passwordIsSet async {
+    final passHash = await _storage.read(key: _keyPassword);
 
     if (passHash != null) {
       return true;
@@ -53,9 +57,7 @@ class Config implements ConfigRepo {
     _passwordMatched = crypto.matchHashedPassword(
         await _storage.read(key: _keyPassword), password);
 
-    if (_passwordMatched) {
-      _password = password;
-    }
+    if (_passwordMatched) _password = password;
 
     return _passwordMatched;
   }

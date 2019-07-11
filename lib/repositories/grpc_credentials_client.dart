@@ -11,11 +11,11 @@ import '../types/abstracts.dart';
 import '../types/connection_config.dart';
 import '../types/credential.dart';
 
-class CredentialsClient implements CredentialsRepo {
-  static CredentialsClient _cached;
+class GRPCCredentialsClient implements CredentialsRepo {
+  static GRPCCredentialsClient _cached;
   grpc.CredentialServiceClient _client;
 
-  CredentialsClient(ConnectionConfig config) {
+  GRPCCredentialsClient(ConnectionConfig config) {
     final caCert = utf8.encode(config.caCertificate);
     final cert = utf8.encode(config.certificate);
     final privateCert = utf8.encode(config.privateCertificate);
@@ -33,8 +33,8 @@ class CredentialsClient implements CredentialsRepo {
     ));
   }
 
-  factory CredentialsClient.cached({ConnectionConfig config}) =>
-      _cached == null ? _cached = CredentialsClient(config) : _cached;
+  factory GRPCCredentialsClient.cached({ConnectionConfig config}) =>
+      config == null ? _cached : _cached = GRPCCredentialsClient(config);
 
   Stream<Metadata> getAllMetadata(String sourceHost) {
     final request = grpc.GetAllMetadataRequest();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
@@ -8,23 +10,45 @@ import '../types/screen_arguments.dart';
 import '../widgets/tappable_text_list.dart';
 
 class Home extends StatefulWidget {
+  const Home({Key key}) : super(key: key);
+
   @override
   State createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   CredentialsRepo _client;
   ConfigRepo _config;
   Future<List<Metadata>> _metadatas;
+  bool _stateIsPaused = false;
+  Timer _pausedStateTimer;
 
   @override
-  didChangeDependencies() {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
 
     _config = Provider.of<ConfigRepo>(context);
-
     _client = Provider.of<CredentialsRepo>(context);
+
     _metadatas = _client.getAllMetadata('').toList();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _stateIsPaused = state == AppLifecycleState.paused;
+
+    if (_stateIsPaused) {
+      _pausedStateTimer = _newPausedStateTimer();
+      return;
+    }
+
+    if (_pausedStateTimer != null) _pausedStateTimer.cancel();
   }
 
   @override
@@ -32,8 +56,10 @@ class _HomeState extends State<Home> {
     return CupertinoPageScaffold(
       child: FutureBuilder<List<Metadata>>(
         future: _metadatas,
-        builder: (BuildContext context,
-                AsyncSnapshot<List<Metadata>> snapshot) =>
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<List<Metadata>> snapshot,
+        ) =>
             (snapshot.connectionState == ConnectionState.done)
                 ? TappableTextList(
                     tappableText: _buildTappableText(context, snapshot.data))
@@ -53,6 +79,22 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (_pausedStateTimer != null) _pausedStateTimer.cancel();
+    super.dispose();
+  }
+
+  Timer _newPausedStateTimer() {
+    const checkPeriod = 30;
+
+    return Timer(Duration(seconds: checkPeriod), () {
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/', ModalRoute.withName('/home'));
+    });
   }
 
   Map<String, GestureTapCallback> _buildTappableText(

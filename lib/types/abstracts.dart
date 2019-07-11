@@ -17,7 +17,7 @@ abstract class ConfigRepo {
 
   String get password;
   Future<void> setPassword(String password);
-  Future<bool> get passwordSet;
+  Future<bool> get passwordIsSet;
   Future<bool> matchesPasswordHash(String password);
 
   Future<void> setConnectionConfig(ConnectionConfig config);
