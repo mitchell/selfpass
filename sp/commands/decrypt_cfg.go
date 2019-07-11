@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mitchell/selfpass/services/cli/types"
+	"github.com/mitchell/selfpass/sp/types"
 )
 
 func makeDecryptCfg(repo types.ConfigRepo) *cobra.Command {
@@ -20,7 +20,7 @@ func makeDecryptCfg(repo types.ConfigRepo) *cobra.Command {
 
 			check(repo.DecryptConfig())
 
-			fmt.Println("Config decrypted. It will automatically encrypt next run of spc.")
+			fmt.Println("Config decrypted. It will automatically encrypt next run of sp.")
 		},
 	}
 

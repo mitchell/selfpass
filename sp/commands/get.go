@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	clitypes "github.com/mitchell/selfpass/services/cli/types"
-	"github.com/mitchell/selfpass/services/crypto"
+	"github.com/mitchell/selfpass/sp/crypto"
+	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func MakeGet(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
+func makeGet(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a credential info and copy password to clipboard",

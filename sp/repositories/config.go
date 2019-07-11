@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/mitchell/selfpass/services/cli/types"
-	"github.com/mitchell/selfpass/services/crypto"
+	"github.com/mitchell/selfpass/sp/crypto"
+	"github.com/mitchell/selfpass/sp/types"
 )
 
 func NewConfigManager(cfgFile *string) *ConfigManager {
@@ -48,7 +48,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 			return output, nil, err
 		}
 
-		cfg = home + "/.spc.toml"
+		cfg = home + "/.sp.toml"
 	}
 
 	mgr.v.SetConfigFile(cfg)

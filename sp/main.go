@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mitchell/selfpass/services/cli/commands"
+	"github.com/mitchell/selfpass/sp/commands"
 )
 
 func main() {

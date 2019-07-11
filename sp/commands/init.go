@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/mitchell/selfpass/services/cli/types"
+	"github.com/mitchell/selfpass/sp/types"
 )
 
 func makeInit(repo types.ConfigRepo) *cobra.Command {

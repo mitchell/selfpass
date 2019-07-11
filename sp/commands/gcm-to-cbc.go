@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"time"
 
-	clitypes "github.com/mitchell/selfpass/services/cli/types"
-	"github.com/mitchell/selfpass/services/credentials/types"
-	"github.com/mitchell/selfpass/services/crypto"
 	"github.com/spf13/cobra"
+
+	"github.com/mitchell/selfpass/services/credentials/types"
+	"github.com/mitchell/selfpass/sp/crypto"
+	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func MakeGCMToCBC(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
+func makeGCMToCBC(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
 	gcmToCBC := &cobra.Command{
 		Use:    "gcm-to-cbc",
 		Hidden: true,

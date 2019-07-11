@@ -2,28 +2,25 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
-	"github.com/mitchell/selfpass/services/cli/repositories"
-	"github.com/mitchell/selfpass/services/cli/types"
-	"github.com/mitchell/selfpass/services/credentials/commands"
 	credrepos "github.com/mitchell/selfpass/services/credentials/repositories"
 	credtypes "github.com/mitchell/selfpass/services/credentials/types"
+	"github.com/mitchell/selfpass/sp/repositories"
+	"github.com/mitchell/selfpass/sp/types"
 )
 
 func Execute() {
 	rootCmd := &cobra.Command{
-		Use:   "spc",
+		Use:   "sp",
 		Short: "This is the CLI client for Selfpass.",
 		Long: `This is the CLI client for Selfpass, the self-hosted password manager. With this tool you
 can interact with the entire Selfpass API.`,
 		Version: "v0.1.0",
 	}
 
-	cfgFile := rootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.spc.toml)")
+	cfgFile := rootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.sp.toml)")
 
 	mgr := repositories.NewConfigManager(cfgFile)
 	clientInit := credrepos.NewCredentialServiceClient
@@ -33,18 +30,18 @@ can interact with the entire Selfpass API.`,
 		makeEncrypt(mgr),
 		makeDecrypt(mgr),
 		makeDecryptCfg(mgr),
-		commands.MakeList(makeInitClient(mgr, clientInit)),
-		commands.MakeCreate(mgr, makeInitClient(mgr, clientInit)),
-		commands.MakeUpdate(mgr, makeInitClient(mgr, clientInit)),
-		commands.MakeGet(mgr, makeInitClient(mgr, clientInit)),
-		commands.MakeDelete(makeInitClient(mgr, clientInit)),
-		commands.MakeGCMToCBC(mgr, makeInitClient(mgr, clientInit)),
+		makeList(makeInitClient(mgr, clientInit)),
+		makeCreate(mgr, makeInitClient(mgr, clientInit)),
+		makeUpdate(mgr, makeInitClient(mgr, clientInit)),
+		makeGet(mgr, makeInitClient(mgr, clientInit)),
+		makeDelete(makeInitClient(mgr, clientInit)),
+		makeGCMToCBC(mgr, makeInitClient(mgr, clientInit)),
 	)
 
 	check(rootCmd.Execute())
 }
 
-func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialClientInit) commands.CredentialClientInit {
+func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialClientInit) CredentialClientInit {
 	return func(ctx context.Context) credtypes.CredentialClient {
 		_, cfg, err := repo.OpenConfig()
 		check(err)
@@ -61,12 +58,5 @@ func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialClient
 		check(err)
 
 		return client
-	}
-}
-
-func check(err error) {
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
 	}
 }

@@ -12,12 +12,12 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	clitypes "github.com/mitchell/selfpass/services/cli/types"
 	"github.com/mitchell/selfpass/services/credentials/types"
-	"github.com/mitchell/selfpass/services/crypto"
+	"github.com/mitchell/selfpass/sp/crypto"
+	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func MakeUpdate(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
+func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
 	var length uint
 	var numbers bool
 	var specials bool

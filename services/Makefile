@@ -4,11 +4,11 @@ docker: clean format install
 	docker-compose build
 
 build: gen-certs-go
-	go build -mod=vendor -o ./bin/server ./cmd/server
-	rm ./cmd/server/certs.go
+	go build -mod=vendor -o ./bin/server ./cmd
+	rm ./cmd/certs.go
 
 clean:
-	rm -rf ./bin ./vendor ./cmd/server/certs.go
+	rm -rf ./bin ./vendor ./cmd/certs.go
 
 local:
 	docker-compose up -d
@@ -88,7 +88,7 @@ gen-client-cert:
 	cd certs && cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare client
 
 gen-certs-go:
-	./gen_certs_go.sh > ./cmd/server/certs.go
+	./gen_certs_go.sh > ./cmd/certs.go
 
 test:
 	go test -cover ./...

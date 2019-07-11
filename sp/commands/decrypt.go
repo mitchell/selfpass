@@ -7,8 +7,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mitchell/selfpass/services/cli/types"
-	"github.com/mitchell/selfpass/services/crypto"
+	"github.com/mitchell/selfpass/sp/crypto"
+	"github.com/mitchell/selfpass/sp/types"
 )
 
 func makeDecrypt(repo types.ConfigRepo) *cobra.Command {
