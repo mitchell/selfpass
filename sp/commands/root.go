@@ -23,7 +23,7 @@ can interact with the entire Selfpass API.`,
 	cfgFile := rootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.sp.toml)")
 
 	mgr := repositories.NewConfigManager(cfgFile)
-	clientInit := credrepos.NewCredentialServiceClient
+	clientInit := credrepos.NewCredentialsClient
 
 	rootCmd.AddCommand(
 		makeInit(mgr),
@@ -41,8 +41,8 @@ can interact with the entire Selfpass API.`,
 	check(rootCmd.Execute())
 }
 
-func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialClientInit) CredentialClientInit {
-	return func(ctx context.Context) credtypes.CredentialClient {
+func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialsClientInit) CredentialsClientInit {
+	return func(ctx context.Context) credtypes.CredentialsClient {
 		_, cfg, err := repo.OpenConfig()
 		check(err)
 

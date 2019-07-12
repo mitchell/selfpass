@@ -15,8 +15,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	protobuf "github.com/mitchell/selfpass/protobuf/go"
 	"github.com/mitchell/selfpass/services/credentials/middleware"
-	"github.com/mitchell/selfpass/services/credentials/protobuf"
 	"github.com/mitchell/selfpass/services/credentials/repositories"
 	"github.com/mitchell/selfpass/services/credentials/service"
 	"github.com/mitchell/selfpass/services/credentials/transport"
@@ -68,7 +68,7 @@ func main() {
 
 	gsrv := transport.NewGRPCServer(svc, logger)
 	srv := grpc.NewServer(grpc.Creds(creds))
-	protobuf.RegisterCredentialServiceServer(srv, gsrv)
+	protobuf.RegisterCredentialsServer(srv, gsrv)
 
 	addr := ":" + *port
 	lis, err := net.Listen("tcp", addr)

@@ -9,6 +9,8 @@ import (
 	"io"
 )
 
+var ErrAuthenticationFailed = errors.New("cipher: message authentication failed")
+
 func GCMEncrypt(key []byte, plaintext []byte) ([]byte, error) {
 	if len(key) != 32 {
 		return nil, fmt.Errorf("key is not 32 bytes")

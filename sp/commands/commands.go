@@ -12,7 +12,7 @@ import (
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-type CredentialClientInit func(ctx context.Context) (c types.CredentialClient)
+type CredentialsClientInit func(ctx context.Context) (c types.CredentialsClient)
 
 func check(err error) {
 	if err != nil {
@@ -21,7 +21,7 @@ func check(err error) {
 	}
 }
 
-func selectCredential(client types.CredentialClient) types.Credential {
+func selectCredential(client types.CredentialsClient) types.Credential {
 	var (
 		idKey  string
 		source string

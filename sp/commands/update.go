@@ -17,7 +17,7 @@ import (
 	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialClientInit) *cobra.Command {
+func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
 	var length uint
 	var numbers bool
 	var specials bool

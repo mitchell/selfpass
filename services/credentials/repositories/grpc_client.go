@@ -10,13 +10,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	protobuf "github.com/mitchell/selfpass/protobuf/go"
 	"github.com/mitchell/selfpass/services/credentials/endpoints"
-	"github.com/mitchell/selfpass/services/credentials/protobuf"
 	"github.com/mitchell/selfpass/services/credentials/transport"
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-func NewCredentialServiceClient(ctx context.Context, target, ca, cert, key string) (types.CredentialClient, error) {
+func NewCredentialsClient(ctx context.Context, target, ca, cert, key string) (types.CredentialsClient, error) {
 	keypair, err := tls.X509KeyPair([]byte(cert), []byte(key))
 	if err != nil {
 		return nil, err
@@ -39,16 +39,16 @@ func NewCredentialServiceClient(ctx context.Context, target, ca, cert, key strin
 		return nil, err
 	}
 
-	return credentialServiceClient{
-		client: protobuf.NewCredentialServiceClient(conn),
+	return credentialsClient{
+		client: protobuf.NewCredentialsClient(conn),
 	}, nil
 }
 
-type credentialServiceClient struct {
-	client protobuf.CredentialServiceClient
+type credentialsClient struct {
+	client protobuf.CredentialsClient
 }
 
-func (c credentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {
+func (c credentialsClient) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {
 	pbmdch := make(chan protobuf.Metadata, 1)
 	errch = make(chan error, 1)
 
@@ -57,7 +57,7 @@ func (c credentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost 
 		Errors:   errch,
 	})
 
-	srv, err := c.client.GetAllMetadata(ctx, &protobuf.GetAllMetadataRequest{SourceHost: sourceHost})
+	srv, err := c.client.GetAllMetadata(ctx, &protobuf.SourceHostRequest{SourceHost: sourceHost})
 	if err != nil {
 		errch <- err
 		return nil, errch
@@ -89,7 +89,7 @@ func (c credentialServiceClient) GetAllMetadata(ctx context.Context, sourceHost 
 	return stream.Metadata, stream.Errors
 }
 
-func (c credentialServiceClient) Get(ctx context.Context, id string) (output types.Credential, err error) {
+func (c credentialsClient) Get(ctx context.Context, id string) (output types.Credential, err error) {
 	req := transport.EncodeIdRequest(endpoints.IDRequest{ID: id})
 
 	res, err := c.client.Get(ctx, &req)
@@ -100,7 +100,7 @@ func (c credentialServiceClient) Get(ctx context.Context, id string) (output typ
 	return transport.DecodeCredential(*res)
 }
 
-func (c credentialServiceClient) Create(ctx context.Context, ci types.CredentialInput) (output types.Credential, err error) {
+func (c credentialsClient) Create(ctx context.Context, ci types.CredentialInput) (output types.Credential, err error) {
 	req := transport.EncodeCredentialRequest(ci)
 
 	res, err := c.client.Create(ctx, &req)
@@ -111,7 +111,7 @@ func (c credentialServiceClient) Create(ctx context.Context, ci types.Credential
 	return transport.DecodeCredential(*res)
 }
 
-func (c credentialServiceClient) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
+func (c credentialsClient) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
 	req := transport.EncodeUpdateRequest(endpoints.UpdateRequest{ID: id, Credential: ci})
 
 	res, err := c.client.Update(ctx, &req)
@@ -122,7 +122,7 @@ func (c credentialServiceClient) Update(ctx context.Context, id string, ci types
 	return transport.DecodeCredential(*res)
 }
 
-func (c credentialServiceClient) Delete(ctx context.Context, id string) (err error) {
+func (c credentialsClient) Delete(ctx context.Context, id string) (err error) {
 	req := transport.EncodeIdRequest(endpoints.IDRequest{ID: id})
 
 	res, err := c.client.Delete(ctx, &req)

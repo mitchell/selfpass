@@ -5,29 +5,22 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 
+	protobuf "github.com/mitchell/selfpass/protobuf/go"
 	"github.com/mitchell/selfpass/services/credentials/endpoints"
-	"github.com/mitchell/selfpass/services/credentials/protobuf"
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-func decodeGetAllMetadataRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	r := request.(protobuf.GetAllMetadataRequest)
-	return endpoints.GetAllMetadataRequest{
+func decodeSourceHostRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	r := request.(protobuf.SourceHostRequest)
+	return endpoints.SourceHostRequest{
 		SourceHost: r.SourceHost,
 	}, nil
 }
 
-func EncodeGetAllMetadataRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	r := request.(endpoints.GetAllMetadataRequest)
-	return protobuf.GetAllMetadataRequest{
+func EncodeSourceHostRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	r := request.(endpoints.SourceHostRequest)
+	return protobuf.SourceHostRequest{
 		SourceHost: r.SourceHost,
-	}, nil
-}
-
-func encodeDumpResponse(ctx context.Context, response interface{}) (interface{}, error) {
-	r := response.(endpoints.DumpResponse)
-	return protobuf.DumpResponse{
-		Contents: r.Contents,
 	}, nil
 }
 

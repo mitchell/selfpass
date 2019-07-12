@@ -30,7 +30,8 @@ the users private key, and server certificates. (All of which will be encrypted)
 				prompt      survey.Prompt
 				privateKey  = strings.Replace(uuid.New().String(), "-", "", -1)
 			)
-			_, cfg, _ := repo.OpenConfig()
+			_, cfg, err := repo.OpenConfig()
+			check(err)
 
 			prompt = &survey.Password{Message: "New master password:"}
 			check(survey.AskOne(prompt, &masterpass, nil))

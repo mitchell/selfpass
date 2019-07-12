@@ -9,7 +9,7 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
-func makeDelete(initClient CredentialClientInit) *cobra.Command {
+func makeDelete(initClient CredentialsClientInit) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a credential using the given ID",

@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	protobuf "github.com/mitchell/selfpass/protobuf/go"
 	"github.com/mitchell/selfpass/services/credentials/endpoints"
-	"github.com/mitchell/selfpass/services/credentials/protobuf"
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
@@ -18,7 +18,7 @@ func NewGRPCServer(svc types.Service, logger log.Logger) GRPCServer {
 	return GRPCServer{
 		getAllMetadata: grpc.NewServer(
 			endpoints.MakeGetAllMetadataEndpoint(svc),
-			decodeGetAllMetadataRequest,
+			decodeSourceHostRequest,
 			encodeMetadataStreamResponse,
 			grpc.ServerErrorLogger(logger),
 		),
@@ -46,12 +46,6 @@ func NewGRPCServer(svc types.Service, logger log.Logger) GRPCServer {
 			noOp,
 			grpc.ServerErrorLogger(logger),
 		),
-		dump: grpc.NewServer(
-			endpoints.MakeDumpEndpoint(svc),
-			noOp,
-			encodeDumpResponse,
-			grpc.ServerErrorLogger(logger),
-		),
 	}
 }
 
@@ -61,10 +55,9 @@ type GRPCServer struct {
 	create         *grpc.Server
 	update         *grpc.Server
 	delete         *grpc.Server
-	dump           *grpc.Server
 }
 
-func (s GRPCServer) GetAllMetadata(r *protobuf.GetAllMetadataRequest, srv protobuf.CredentialService_GetAllMetadataServer) (err error) {
+func (s GRPCServer) GetAllMetadata(r *protobuf.SourceHostRequest, srv protobuf.Credentials_GetAllMetadataServer) (err error) {
 	defer func() { err = handlerGRPCError(err) }()
 
 	var i interface{}
@@ -133,26 +126,14 @@ func (s GRPCServer) Update(ctx context.Context, r *protobuf.UpdateRequest) (*pro
 	return c, nil
 }
 
-func (s GRPCServer) Delete(ctx context.Context, r *protobuf.IdRequest) (*protobuf.DeleteResponse, error) {
+func (s GRPCServer) Delete(ctx context.Context, r *protobuf.IdRequest) (*protobuf.SuccessResponse, error) {
 	ctx, _, err := s.delete.ServeGRPC(ctx, *r)
 	if err != nil {
 		err = handlerGRPCError(err)
 		return nil, err
 	}
 
-	return &protobuf.DeleteResponse{Success: true}, nil
-}
-
-func (s GRPCServer) Dump(ctx context.Context, r *protobuf.EmptyRequest) (*protobuf.DumpResponse, error) {
-	ctx, i, err := s.dump.ServeGRPC(ctx, *r)
-	if err != nil {
-		err = handlerGRPCError(err)
-		return nil, err
-	}
-
-	res := &protobuf.DumpResponse{}
-	*res = i.(protobuf.DumpResponse)
-	return res, nil
+	return &protobuf.SuccessResponse{Success: true}, nil
 }
 
 func handlerGRPCError(err error) error {

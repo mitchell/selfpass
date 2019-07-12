@@ -8,14 +8,14 @@ import (
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-func NewCredentials(repo types.CredentialRepo) Credentials {
+func NewCredentials(repo types.CredentialsRepo) Credentials {
 	return Credentials{
 		repo: repo,
 	}
 }
 
 type Credentials struct {
-	repo types.CredentialRepo
+	repo types.CredentialsRepo
 }
 
 func (svc Credentials) GetAllMetadata(ctx context.Context, sourceHost string) (output <-chan types.Metadata, errch chan error) {

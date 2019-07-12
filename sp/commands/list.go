@@ -12,7 +12,7 @@ import (
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-func makeList(initClient CredentialClientInit) *cobra.Command {
+func makeList(initClient CredentialsClientInit) *cobra.Command {
 	var sourceHost string
 
 	listCmd := &cobra.Command{

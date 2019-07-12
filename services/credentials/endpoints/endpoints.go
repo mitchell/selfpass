@@ -30,7 +30,7 @@ func MakeGetEndpoint(svc types.Service) endpoint.Endpoint {
 
 func MakeGetAllMetadataEndpoint(svc types.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		r := request.(GetAllMetadataRequest)
+		r := request.(SourceHostRequest)
 
 		mdch, errch := svc.GetAllMetadata(ctx, r.SourceHost)
 
@@ -48,13 +48,6 @@ func MakeUpdateEndpoint(svc types.Service) endpoint.Endpoint {
 	}
 }
 
-func MakeDumpEndpoint(svc types.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		contents, err := svc.DumpDB(ctx)
-		return DumpResponse{Contents: contents}, err
-	}
-}
-
 type DumpResponse struct {
 	Contents []byte
 }
@@ -63,7 +56,7 @@ type IDRequest struct {
 	ID string
 }
 
-type GetAllMetadataRequest struct {
+type SourceHostRequest struct {
 	SourceHost string
 }
 

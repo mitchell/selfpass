@@ -8,5 +8,8 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/protobuf v1.3.2
 	github.com/mediocregopher/radix/v3 v3.3.0
+	github.com/mitchell/selfpass/protobuf/go v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.22.0
 )
+
+replace github.com/mitchell/selfpass/protobuf/go => ../protobuf/go
