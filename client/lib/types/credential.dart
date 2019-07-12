@@ -1,4 +1,4 @@
-import '../protobuf/service.pb.dart' as protobuf;
+import 'package:selfpass_protobuf/credentials.pb.dart' as protobuf;
 
 class Metadata {
   String id;

@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
-
-import '../protobuf/service.pbgrpc.dart' as grpc;
-import '../protobuf/service.pb.dart' as protobuf;
+import 'package:selfpass_protobuf/credentials.pbgrpc.dart' as grpc;
+import 'package:selfpass_protobuf/credentials.pb.dart' as protobuf;
 
 import '../types/abstracts.dart';
 import '../types/connection_config.dart';
@@ -13,7 +12,7 @@ import '../types/credential.dart';
 
 class GRPCCredentialsClient implements CredentialsRepo {
   static GRPCCredentialsClient _cached;
-  grpc.CredentialServiceClient _client;
+  grpc.CredentialsClient _client;
 
   GRPCCredentialsClient(ConnectionConfig config) {
     final caCert = utf8.encode(config.caCertificate);
@@ -24,7 +23,7 @@ class GRPCCredentialsClient implements CredentialsRepo {
     final hostname = splitHost[0];
     final port = int.parse(splitHost[1]);
 
-    _client = grpc.CredentialServiceClient(ClientChannel(
+    _client = grpc.CredentialsClient(ClientChannel(
       hostname,
       port: port,
       options: ChannelOptions(
@@ -37,7 +36,7 @@ class GRPCCredentialsClient implements CredentialsRepo {
       config == null ? _cached : _cached = GRPCCredentialsClient(config);
 
   Stream<Metadata> getAllMetadata(String sourceHost) {
-    final request = grpc.GetAllMetadataRequest();
+    final request = grpc.SourceHostRequest();
     request.sourceHost = sourceHost;
 
     return _client.getAllMetadata(request).map<Metadata>(
