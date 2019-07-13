@@ -82,10 +82,10 @@ gen-ca:
 	cd certs && cfssl genkey -initca csr.json | cfssljson -bare ca
 
 gen-server-cert:
-	cd certs && cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare server
+	cd certs && cfssl gencert -ca ca.pem -ca-key ca-key.pem -profile www csr.json | cfssljson -bare server
 
 gen-client-cert:
-	cd certs && cfssl gencert -ca ca.pem -ca-key ca-key.pem csr.json | cfssljson -bare client
+	cd certs && cfssl gencert -ca ca.pem -ca-key ca-key.pem -profile client csr.json | cfssljson -bare client
 
 gen-certs-go:
 	./gen_certs_go.sh > ./cmd/certs.go
