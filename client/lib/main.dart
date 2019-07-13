@@ -36,7 +36,7 @@ class Selfpass extends StatelessWidget {
               title = 'Hosts';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        GRPCCredentialsClient.cached(config: settings.arguments),
+                        GRPCCredentialsClient.getInstance(config: settings.arguments),
                     child: Home(),
                   );
               break;
@@ -45,7 +45,7 @@ class Selfpass extends StatelessWidget {
               title = 'Credentials';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        GRPCCredentialsClient.cached(),
+                        GRPCCredentialsClient.getInstance(),
                     child: Credentials(settings.arguments),
                   );
               break;
@@ -54,7 +54,7 @@ class Selfpass extends StatelessWidget {
               title = 'Credential';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        GRPCCredentialsClient.cached(),
+                        GRPCCredentialsClient.getInstance(),
                     child: Credential(settings.arguments),
                   );
               break;

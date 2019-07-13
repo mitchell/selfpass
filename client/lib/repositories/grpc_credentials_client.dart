@@ -11,7 +11,7 @@ import '../types/connection_config.dart';
 import '../types/credential.dart';
 
 class GRPCCredentialsClient implements CredentialsRepo {
-  static GRPCCredentialsClient _cached;
+  static GRPCCredentialsClient _instance;
   grpc.CredentialsClient _client;
 
   GRPCCredentialsClient(ConnectionConfig config) {
@@ -32,8 +32,8 @@ class GRPCCredentialsClient implements CredentialsRepo {
     ));
   }
 
-  factory GRPCCredentialsClient.cached({ConnectionConfig config}) =>
-      config == null ? _cached : _cached = GRPCCredentialsClient(config);
+  factory GRPCCredentialsClient.getInstance({ConnectionConfig config}) =>
+      config == null ? _instance : _instance = GRPCCredentialsClient(config);
 
   Stream<Metadata> getAllMetadata(String sourceHost) {
     final request = grpc.SourceHostRequest();
