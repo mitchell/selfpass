@@ -2,24 +2,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 import 'repositories/grpc_credentials_client.dart';
-import 'repositories/secure_storage_config.dart';
+import 'repositories/encrypted_shared_preferences.dart';
 
 import 'screens/authentication.dart';
+import 'screens/config.dart';
 import 'screens/credential.dart';
 import 'screens/credentials.dart';
-import 'screens/config.dart';
 import 'screens/home.dart';
 
 import 'types/abstracts.dart';
 import 'types/screen_arguments.dart';
 
-void main() => runApp(Selfpass());
+void main() {
+  runApp(Selfpass());
+}
 
 class Selfpass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider<ConfigRepo>(
-      builder: (BuildContext context) => SecureStorageConfig(),
+      builder: (BuildContext context) => EncryptedSharedPreferences(),
       child: CupertinoApp(
         title: 'Selfpass',
         onGenerateRoute: (RouteSettings settings) {
@@ -36,7 +38,8 @@ class Selfpass extends StatelessWidget {
               title = 'Hosts';
               builder = (BuildContext context) => Provider<CredentialsRepo>(
                     builder: (BuildContext context) =>
-                        GRPCCredentialsClient.getInstance(config: settings.arguments),
+                        GRPCCredentialsClient.getInstance(
+                            config: settings.arguments),
                     child: Home(),
                   );
               break;

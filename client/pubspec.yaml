@@ -28,9 +28,11 @@ dependencies:
   provider: ^3.0.0
 
   crypt: ^1.0.7
-  flutter_secure_storage: ^3.2.1
   password_hash: ^2.0.0
   encrypt: ^3.2.0
+
+  # flutter_secure_storage: ^3.2.1
+  shared_preferences: 0.5.3
 
   otp: ^1.0.3
 

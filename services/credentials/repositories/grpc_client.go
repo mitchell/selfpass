@@ -57,7 +57,10 @@ func (c credentialsClient) GetAllMetadata(ctx context.Context, sourceHost string
 		Errors:   errch,
 	})
 
-	srv, err := c.client.GetAllMetadata(ctx, &protobuf.SourceHostRequest{SourceHost: sourceHost})
+	srv, err := c.client.GetAllMetadata(
+		ctx,
+		transport.EncodeSourceHostRequest(endpoints.SourceHostRequest{SourceHost: sourceHost}),
+	)
 	if err != nil {
 		errch <- err
 		return nil, errch

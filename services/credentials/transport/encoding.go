@@ -17,11 +17,10 @@ func decodeSourceHostRequest(ctx context.Context, request interface{}) (interfac
 	}, nil
 }
 
-func EncodeSourceHostRequest(ctx context.Context, request interface{}) (interface{}, error) {
-	r := request.(endpoints.SourceHostRequest)
-	return protobuf.SourceHostRequest{
-		SourceHost: r.SourceHost,
-	}, nil
+func EncodeSourceHostRequest(request endpoints.SourceHostRequest) *protobuf.SourceHostRequest {
+	return &protobuf.SourceHostRequest{
+		SourceHost: request.SourceHost,
+	}
 }
 
 func encodeMetadataStreamResponse(ctx context.Context, response interface{}) (interface{}, error) {

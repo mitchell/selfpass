@@ -41,12 +41,12 @@ The newest addition to the *selfpass* project is the client built using Flutter,
 capable of targeting to iOS, Android, and Desktop. It supports all the same features as the CLI tool
 using GUIs, with all the same safety and encryption as the CLI.
 
-| Goal                                                                     | Progress | Comment          |
-| ---                                                                      | :---:    | ---              |
-| Support mutual TLS.                                                      | 100%     |                  |
-| Support credentials CRUD via gRPC.                                       | 25%      | TODO: CUD        |
-| Support storage of certs, PK, and host in shared preferences, encrypted. | 100%     |                  |
-| Support AES-CBC encryption of passes and OTP secrets, using MP and PK.   | 50%      | TODO: decryption |
+| Goal                                                                     | Progress | Comment   |
+| ---                                                                      | :---:    | ---       |
+| Support mutual TLS.                                                      | 100%     |           |
+| Support credentials CRUD via gRPC.                                       | 25%      | TODO: CUD |
+| Support storage of certs, PK, and host in shared preferences, encrypted. | 100%     |           |
+| Support AES-CBC encryption of passes and OTP secrets, using MP and PK.   | 100%     |           |
 
 ## Other Info
 
@@ -58,12 +58,12 @@ using GUIs, with all the same safety and encryption as the CLI.
 
 **Architectural 3rd-party Technologies in Use (and where)**
 
-- Golang (services & protobuf)
-- Dart (client & protobuf)
-- Flutter (client)
-- Go-Kit (services)
-- gRPC & Protobuf (all)
-- Cobra Commander & Viper Config (spc)
-- Redis (services)
-- Docker (services)
-- Debian (docker images and machines)
+- Golang: services, sp, & protobuf
+- Dart: client & protobuf
+- Flutter: client
+- Go-Kit: services
+- gRPC/Protobuf: all
+- Cobra Commander & Viper Config: sp
+- Redis: services
+- Docker: services
+- Debian: docker images & machines

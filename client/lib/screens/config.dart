@@ -58,8 +58,10 @@ class _ConfigState extends State<Config> {
           : CupertinoNavigationBar(
               trailing: GestureDetector(
                 onTap: _buildResetAllHandler(context),
-                child: Text('Reset App',
-                    style: TextStyle(color: CupertinoColors.destructiveRed)),
+                child: Text(
+                  'Reset',
+                  style: TextStyle(color: CupertinoColors.destructiveRed),
+                ),
               ),
             ),
       child: Container(

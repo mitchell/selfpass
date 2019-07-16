@@ -92,6 +92,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     const checkPeriod = 30;
 
     return Timer(Duration(seconds: checkPeriod), () {
+      _config.reset();
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/', ModalRoute.withName('/home'));
     });
@@ -127,7 +128,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   GestureTapCallback _makeLockOnTapHandler(BuildContext context) {
-    return () => Navigator.of(context).pushReplacementNamed('/');
+    return () {
+      _config.reset();
+      Navigator.of(context)
+          .pushNamedAndRemoveUntil('/', ModalRoute.withName('/home'));
+    };
   }
 
   GestureTapCallback _makeConfigOnTapHandler(BuildContext context) {

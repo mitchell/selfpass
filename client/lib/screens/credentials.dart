@@ -30,8 +30,9 @@ class Credentials extends StatelessWidget {
               children: [
                 Text('Decrypting credential...'),
                 Container(
-                    margin: EdgeInsets.only(top: 10),
-                    child: CupertinoActivityIndicator()),
+                  margin: EdgeInsets.only(top: 10),
+                  child: CupertinoActivityIndicator(),
+                ),
               ],
             )),
           );
@@ -44,12 +45,18 @@ class Credentials extends StatelessWidget {
 
           final credential = await client.get(id);
 
-          credential.password = crypto.decryptPassword(
-              password, await privateKey, credential.password);
+          credential.password = crypto.decrypt(
+            credential.password,
+            password,
+            await privateKey,
+          );
 
-          if (credential.otpSecret != null && credential.otpSecret != '') {
-            credential.otpSecret = crypto.decryptPassword(
-                password, await privateKey, credential.otpSecret);
+          if (credential.otpSecret.isNotEmpty) {
+            credential.otpSecret = crypto.decrypt(
+              credential.otpSecret,
+              password,
+              await privateKey,
+            );
           }
 
           Navigator.of(context)
