@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
-import 'repositories/grpc_credentials_client.dart';
-import 'repositories/encrypted_shared_preferences.dart';
+import 'repositories/repositories.dart';
 
 import 'screens/authentication.dart';
 import 'screens/config.dart';

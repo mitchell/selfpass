@@ -1,3 +1,5 @@
+part of 'repositories.dart';
+
 class ConfigBase {
   static const keyPrivateKey = "private_key";
   static const keyConnectionConfig = "connection_config";
@@ -10,8 +12,6 @@ class ConfigBase {
     checkIfPasswordMatched();
     return _password;
   }
-
-  set password(String password) => _password = password;
 
   void checkIfPasswordMatched() {
     if (passwordMatched) return;

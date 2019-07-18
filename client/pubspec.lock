@@ -35,7 +35,7 @@ packages:
       name: boolean_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.4"
   charcode:
     dependency: transitive
     description:
@@ -108,7 +108,7 @@ packages:
       name: googleapis_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.8"
+    version: "0.2.10"
   grpc:
     dependency: "direct main"
     description:
@@ -178,7 +178,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0+1"
+    version: "1.7.0"
   pointycastle:
     dependency: transitive
     description:
@@ -192,7 +192,7 @@ packages:
       name: protobuf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.12"
+    version: "0.13.15"
   provider:
     dependency: "direct main"
     description:

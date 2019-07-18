@@ -17,11 +17,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
-  CredentialsRepo _client;
-  ConfigRepo _config;
-  Future<List<Metadata>> _metadatas;
-  bool _stateIsPaused = false;
-  Timer _pausedStateTimer;
+  CredentialsRepo client;
+  ConfigRepo config;
+  Future<List<Metadata>> metadatas;
+  bool stateIsPaused = false;
+  Timer pausedStateTimer;
 
   @override
   void initState() {
@@ -33,49 +33,51 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _config = Provider.of<ConfigRepo>(context);
-    _client = Provider.of<CredentialsRepo>(context);
+    config = Provider.of<ConfigRepo>(context);
+    client = Provider.of<CredentialsRepo>(context);
 
-    _metadatas = _client.getAllMetadata('').toList();
+    metadatas = client.getAllMetadata('').toList();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _stateIsPaused = state == AppLifecycleState.paused;
+    stateIsPaused = state == AppLifecycleState.paused;
 
-    if (_stateIsPaused) {
-      _pausedStateTimer = _newPausedStateTimer();
+    if (stateIsPaused) {
+      pausedStateTimer = newPausedStateTimer();
       return;
     }
 
-    if (_pausedStateTimer != null) _pausedStateTimer.cancel();
+    if (pausedStateTimer != null) pausedStateTimer.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: FutureBuilder<List<Metadata>>(
-        future: _metadatas,
+        future: metadatas,
         builder: (
           BuildContext context,
           AsyncSnapshot<List<Metadata>> snapshot,
         ) =>
             (snapshot.connectionState == ConnectionState.done)
                 ? TappableTextList(
-                    tappableText: _buildTappableText(context, snapshot.data))
+                    tappableText: buildTappableText(context, snapshot.data))
                 : Center(child: CupertinoActivityIndicator()),
       ),
       navigationBar: CupertinoNavigationBar(
-        leading: GestureDetector(
-          child: Align(
-              child: Text('Lock',
-                  style: TextStyle(color: CupertinoColors.destructiveRed)),
-              alignment: Alignment(-0.9, 0)),
-          onTap: _makeLockOnTapHandler(context),
+        leading: CupertinoButton(
+          child: Text(
+            'Lock',
+            style: TextStyle(color: CupertinoColors.destructiveRed),
+          ),
+          onPressed: makeLockOnTapHandler(context),
+          padding: EdgeInsets.zero,
         ),
-        trailing: GestureDetector(
+        trailing: CupertinoButton(
           child: Icon(CupertinoIcons.gear),
-          onTap: _makeConfigOnTapHandler(context),
+          onPressed: makeConfigOnTapHandler(context),
+          padding: EdgeInsets.zero,
         ),
       ),
     );
@@ -84,21 +86,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_pausedStateTimer != null) _pausedStateTimer.cancel();
+    if (pausedStateTimer != null) pausedStateTimer.cancel();
     super.dispose();
   }
 
-  Timer _newPausedStateTimer() {
+  Timer newPausedStateTimer() {
     const checkPeriod = 30;
 
     return Timer(Duration(seconds: checkPeriod), () {
-      _config.reset();
+      config.reset();
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/', ModalRoute.withName('/home'));
     });
   }
 
-  Map<String, GestureTapCallback> _buildTappableText(
+  Map<String, GestureTapCallback> buildTappableText(
     BuildContext context,
     List<Metadata> metadatas,
   ) {
@@ -127,18 +129,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return tappableText;
   }
 
-  GestureTapCallback _makeLockOnTapHandler(BuildContext context) {
+  GestureTapCallback makeLockOnTapHandler(BuildContext context) {
     return () {
-      _config.reset();
+      config.reset();
       Navigator.of(context)
           .pushNamedAndRemoveUntil('/', ModalRoute.withName('/home'));
     };
   }
 
-  GestureTapCallback _makeConfigOnTapHandler(BuildContext context) {
+  GestureTapCallback makeConfigOnTapHandler(BuildContext context) {
     return () async => Navigator.of(context).pushNamed('/config',
         arguments: ConfigScreenArguments(
-            connectionConfig: await _config.connectionConfig,
-            privateKey: await _config.privateKey));
+            connectionConfig: await config.connectionConfig,
+            privateKey: await config.privateKey));
   }
 }

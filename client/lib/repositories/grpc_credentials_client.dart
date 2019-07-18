@@ -1,14 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:grpc/grpc.dart';
-import 'package:selfpass_protobuf/credentials.pbgrpc.dart' as grpc;
-import 'package:selfpass_protobuf/credentials.pb.dart' as protobuf;
-
-import '../types/abstracts.dart';
-import '../types/connection_config.dart';
-import '../types/credential.dart';
+part of 'repositories.dart';
 
 class GRPCCredentialsClient implements CredentialsRepo {
   static GRPCCredentialsClient _instance;

@@ -1,13 +1,4 @@
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'config_base.dart';
-
-import '../types/abstracts.dart';
-import '../types/connection_config.dart';
-
-import '../utils/crypto.dart' as crypto;
+part of 'repositories.dart';
 
 class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
   @override
@@ -19,7 +10,7 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
 
     if (cipherText == null) return null;
 
-    final configJson = crypto.decrypt(cipherText, password);
+    final configJson = crypto.decrypt(cipherText, _password);
 
     return ConnectionConfig.fromJson(json.decode(configJson));
   }
@@ -44,7 +35,7 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
       password,
     );
 
-    if (passwordMatched) this.password = password;
+    if (passwordMatched) _password = password;
 
     return passwordMatched;
   }
@@ -66,7 +57,7 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
     final prefs = await SharedPreferences.getInstance();
     final cipherText = prefs.getString(ConfigBase.keyPrivateKey);
 
-    return crypto.decrypt(cipherText, password);
+    return crypto.decrypt(cipherText, _password);
   }
 
   @override
@@ -79,7 +70,7 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
 
     prefs.setString(
       ConfigBase.keyConnectionConfig,
-      crypto.encrypt(configJson, password),
+      crypto.encrypt(configJson, _password),
     );
   }
 
@@ -87,7 +78,7 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
   Future<void> setPassword(String password) async {
     final prefs = await SharedPreferences.getInstance();
 
-    this.password = password;
+    _password = password;
     passwordMatched = true;
 
     prefs.setString(ConfigBase.keyPassword, crypto.hashPassword(password));
@@ -97,6 +88,6 @@ class EncryptedSharedPreferences extends ConfigBase implements ConfigRepo {
   Future<void> setPrivateKey(String key) async {
     final prefs = await SharedPreferences.getInstance();
 
-    prefs.setString(ConfigBase.keyPrivateKey, crypto.encrypt(key, password));
+    prefs.setString(ConfigBase.keyPrivateKey, crypto.encrypt(key, _password));
   }
 }

@@ -56,11 +56,13 @@ String encrypt(String plainText, String masterpass, [String privateKey]) {
   );
 
   final random = Random.secure();
-  final ivBytes = List<int>.generate(aesBlockSize, (_) => random.nextInt(byteIntMax));
+  final ivBytes =
+      List<int>.generate(aesBlockSize, (_) => random.nextInt(byteIntMax));
   final iv = IV(Uint8List.fromList(ivBytes));
 
   final encrypter = Encrypter(AES(Key(key), mode: AESMode.cbc));
-  final cipherBytes = List<int>.from(encrypter.encrypt(plainText, iv: iv).bytes);
+  final cipherBytes =
+      List<int>.from(encrypter.encrypt(plainText, iv: iv).bytes);
   cipherBytes.insertAll(0, ivBytes);
 
   if (privateKeyWasEmpty) {
@@ -70,6 +72,30 @@ String encrypt(String plainText, String masterpass, [String privateKey]) {
   }
 
   return base64.encode(cipherBytes);
+}
+
+String generatePassword(int length,
+    [bool numbers = true, bool specials = true]) {
+  const alphaValues = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numberValues = '1234567890';
+  const specialValues = '!@#\$%^&*()-_=+';
+
+  final random = Random.secure();
+  List<int> values;
+
+  if (numbers && specials) {
+    values = (alphaValues + numberValues + specialValues).codeUnits;
+  } else if (numbers) {
+    values = (alphaValues + numberValues).codeUnits;
+  } else if (specials) {
+    values = (alphaValues + specialValues).codeUnits;
+  }
+
+  final valuesLen = values.length;
+  final passValues =
+      List<int>.generate(length, (_) => values[random.nextInt(valuesLen)]);
+
+  return String.fromCharCodes(passValues);
 }
 
 const saltSize = 16;
