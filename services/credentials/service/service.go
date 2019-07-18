@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"time"
 
@@ -64,6 +65,16 @@ func validateCredentialInput(c types.CredentialInput) (err error) {
 		return fmt.Errorf("%s must specify password", types.InvalidArgument)
 	}
 
+	if _, err = base64.StdEncoding.DecodeString(c.Password); err != nil {
+		return fmt.Errorf("%s password must be encrypted and base64 encoded", types.InvalidArgument)
+	}
+
+	if c.OTPSecret != "" {
+		if _, err = base64.StdEncoding.DecodeString(c.OTPSecret); err != nil {
+			return fmt.Errorf("%s otp secret must be encrypted and base64 encoded", types.InvalidArgument)
+		}
+	}
+
 	return err
 }
 
@@ -102,6 +113,12 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 	c.Email = ci.Email
 	c.Username = ci.Username
 	c.Tag = ci.Tag
+
+	if c.ID != id {
+		if err = svc.repo.Delete(ctx, id); err != nil {
+			return output, err
+		}
+	}
 
 	return c, svc.repo.Put(ctx, c)
 }

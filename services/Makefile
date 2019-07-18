@@ -46,10 +46,10 @@ machine-put-redis.conf:
 	docker-machine scp ./redis.conf selfpass01:redis.conf
 
 machine-put-data:
-	docker-machine scp -r ./data selfpass01:
+	docker-machine scp ./data/appendonly.aof selfpass01:data/
 
 machine-get-data:
-	docker-machine scp -r selfpass01:data ./
+	docker-machine scp selfpass01:data/appendonly.aof ./data/
 
 machine-add-grpc-server-tag:
 	gcloud compute instances add-tags selfpass01 \
