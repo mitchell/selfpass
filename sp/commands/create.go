@@ -19,8 +19,8 @@ import (
 
 func makeCreate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
 	var length uint
-	var numbers bool
-	var specials bool
+	var noNumbers bool
+	var noSpecials bool
 
 	createCmd := &cobra.Command{
 		Use:   "create",
@@ -77,7 +77,7 @@ password.`,
 			check(survey.AskOne(prompt, &newpass, nil))
 
 			if newpass {
-				ci.Password = crypto.GeneratePassword(int(length), numbers, specials)
+				ci.Password = crypto.GeneratePassword(int(length), !noNumbers, !noSpecials)
 
 				var copypass bool
 				prompt = &survey.Confirm{Message: "Copy new pass to clipboard?", Default: true}
@@ -147,8 +147,8 @@ password.`,
 		},
 	}
 
-	createCmd.Flags().BoolVarP(&numbers, "numbers", "n", true, "use numbers in the generated password")
-	createCmd.Flags().BoolVarP(&specials, "specials", "s", false, "use special characters in the generated password")
+	createCmd.Flags().BoolVarP(&noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
+	createCmd.Flags().BoolVarP(&noSpecials, "no-specials", "s", false, "do not use special characters in the generated password")
 	createCmd.Flags().UintVarP(&length, "length", "l", 32, "length of the generated password")
 
 	return createCmd

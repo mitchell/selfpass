@@ -19,8 +19,8 @@ import (
 
 func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
 	var length uint
-	var numbers bool
-	var specials bool
+	var noNumbers bool
+	var noSpecials bool
 
 	updateCmd := &cobra.Command{
 		Use:   "update",
@@ -111,7 +111,7 @@ password.`,
 				check(survey.AskOne(prompt, &randpass, nil))
 
 				if randpass {
-					ci.Password = crypto.GeneratePassword(int(length), numbers, specials)
+					ci.Password = crypto.GeneratePassword(int(length), !noNumbers, !noSpecials)
 
 					var copypass bool
 					prompt = &survey.Confirm{Message: "Copy new pass to clipboard?", Default: true}
@@ -182,8 +182,8 @@ password.`,
 		},
 	}
 
-	updateCmd.Flags().BoolVarP(&numbers, "numbers", "n", true, "use numbers in the generated password")
-	updateCmd.Flags().BoolVarP(&specials, "specials", "s", false, "use special characters in the generated password")
+	updateCmd.Flags().BoolVarP(&noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
+	updateCmd.Flags().BoolVarP(&noSpecials, "no-specials", "s", false, "do not use special characters in the generated password")
 	updateCmd.Flags().UintVarP(&length, "length", "l", 32, "length of the generated password")
 
 	return updateCmd
