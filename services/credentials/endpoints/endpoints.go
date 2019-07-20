@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
+
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
@@ -46,10 +47,6 @@ func MakeUpdateEndpoint(svc types.Service) endpoint.Endpoint {
 		r := request.(UpdateRequest)
 		return svc.Update(ctx, r.ID, r.Credential)
 	}
-}
-
-type DumpResponse struct {
-	Contents []byte
 }
 
 type IDRequest struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mediocregopher/radix/v3"
+
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
@@ -23,7 +24,7 @@ func (conn RedisConn) GetAllMetadata(ctx context.Context, sourceHost string, err
 		defer close(mdch)
 
 		var key string
-		scr := radix.NewScanner(conn.p, radix.ScanOpts{Command: scan, Pattern: types.TypePrefixCred + dash + sourceHost + star})
+		scr := radix.NewScanner(conn.p, radix.ScanAllKeys)
 
 		for scr.Next(&key) {
 			select {
@@ -39,7 +40,9 @@ func (conn RedisConn) GetAllMetadata(ctx context.Context, sourceHost string, err
 				return
 			}
 
-			mdch <- md
+			if sourceHost == "" || sourceHost == md.SourceHost {
+				mdch <- md
+			}
 		}
 	}()
 
@@ -61,20 +64,7 @@ func (conn RedisConn) Delete(ctx context.Context, id string) (err error) {
 	return err
 }
 
-func (conn RedisConn) DumpDB(ctx context.Context) (bs []byte, err error) {
-	bs = []byte{}
-
-	if err := conn.p.Do(radix.Cmd(&bs, "DUMP")); err != nil {
-		return nil, err
-	}
-
-	return bs, nil
-}
-
 const (
-	dash    = "-"
-	star    = "*"
-	scan    = "SCAN"
 	hGetAll = "HGETALL"
 	hMSet   = "HMSET"
 	del     = "DEL"

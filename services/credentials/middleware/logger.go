@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
+
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
@@ -96,19 +97,4 @@ func (svc ServiceLogger) Delete(ctx context.Context, id string) (err error) {
 
 	err = svc.next.Delete(ctx, id)
 	return err
-}
-
-func (svc ServiceLogger) DumpDB(ctx context.Context) (output []byte, err error) {
-	defer func(begin time.Time) {
-		_ = svc.l.Log(
-			"service", "Credentials",
-			"method", "Dump",
-			"output", output,
-			"err", err,
-			"took", time.Since(begin),
-		)
-	}(time.Now())
-
-	output, err = svc.next.DumpDB(ctx)
-	return output, err
 }

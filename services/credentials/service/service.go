@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/mitchell/selfpass/services/credentials/types"
@@ -37,10 +38,12 @@ func (svc Credentials) Create(ctx context.Context, ci types.CredentialInput) (ou
 		return output, err
 	}
 
+	now := time.Now()
+
 	var c types.Credential
-	c.ID = generateID(ci)
-	c.CreatedAt = time.Now()
-	c.UpdatedAt = time.Now()
+	c.ID = generateID()
+	c.CreatedAt = now
+	c.UpdatedAt = now
 	c.Primary = ci.Primary
 	c.LoginURL = ci.LoginURL
 	c.SourceHost = ci.SourceHost
@@ -78,15 +81,19 @@ func validateCredentialInput(c types.CredentialInput) (err error) {
 	return err
 }
 
-func generateID(ci types.CredentialInput) string {
-	idFormat := types.TypePrefixCred + "-%s-%s"
+func generateID() string {
+	const idLen = 8
+	const alphanumerics = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
+	const alphaLen = len(alphanumerics)
 
-	if ci.Tag != "" {
-		idFormat += "-%s"
-		return fmt.Sprintf(idFormat, ci.SourceHost, ci.Primary, ci.Tag)
+	rand.Seed(time.Now().UnixNano())
+	id := make([]byte, idLen)
+
+	for index := range id {
+		id[index] = alphanumerics[rand.Int63()%int64(alphaLen)]
 	}
 
-	return fmt.Sprintf(idFormat, ci.SourceHost, ci.Primary)
+	return fmt.Sprintf("%s-%s", types.KeyCredential, string(id))
 }
 
 func (svc Credentials) Update(ctx context.Context, id string, ci types.CredentialInput) (output types.Credential, err error) {
@@ -103,7 +110,6 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 		return output, err
 	}
 
-	c.ID = generateID(ci)
 	c.UpdatedAt = time.Now()
 	c.Primary = ci.Primary
 	c.LoginURL = ci.LoginURL
@@ -114,12 +120,6 @@ func (svc Credentials) Update(ctx context.Context, id string, ci types.Credentia
 	c.Username = ci.Username
 	c.Tag = ci.Tag
 
-	if c.ID != id {
-		if err = svc.repo.Delete(ctx, id); err != nil {
-			return output, err
-		}
-	}
-
 	return c, svc.repo.Put(ctx, c)
 }
 
@@ -128,8 +128,4 @@ func (svc Credentials) Delete(ctx context.Context, id string) (err error) {
 		return fmt.Errorf("%s must specify an id", types.InvalidArgument)
 	}
 	return svc.repo.Delete(ctx, id)
-}
-
-func (svc Credentials) DumpDB(ctx context.Context) (bs []byte, err error) {
-	return svc.repo.DumpDB(ctx)
 }

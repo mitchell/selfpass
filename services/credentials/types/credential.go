@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const TypePrefixCred = "cred"
+const KeyCredential = "cred"
 
 type Credential struct {
 	Metadata
