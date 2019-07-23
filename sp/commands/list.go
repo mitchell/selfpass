@@ -65,6 +65,10 @@ includes almost all the information but the most sensitive.`,
 			var source string
 			check(survey.AskOne(prompt, &source, nil))
 
+			sort.Slice(mds[source], func(i, j int) bool {
+				return mds[source][i].Primary < mds[source][j].Primary
+			})
+
 			for _, md := range mds[source] {
 				fmt.Println(md)
 			}

@@ -81,6 +81,8 @@ receive:
 		keyIDMap[key] = md.ID
 	}
 
+	sort.Strings(keys)
+
 	prompt = &survey.Select{
 		Message:  "Primary user key (and tag):",
 		Options:  keys,

@@ -1,14 +1,5 @@
 version: "3.7"
 services:
-  redis:
-    image: "redis:5.0.5"
-    restart: on-failure
-    command:
-      - redis-server
-      - /redis.conf
-    volumes:
-      - "./redis.conf:/redis.conf"
-      - "./data:/data"
   server:
     build: .
     restart: on-failure
@@ -17,5 +8,5 @@ services:
       - -v
     ports:
       - "8080:8080"
-    depends_on:
-      - redis
+    volumes:
+      - "./data:/home/selfpass/data"

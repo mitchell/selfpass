@@ -31,7 +31,6 @@ machine-create-google:
 	    --google-username selfpass \
 	    --google-zone us-west1-c \
 	    selfpass01
-	$(MAKE) machine-put-redis.conf
 	$(MAKE) machine-put-data
 	$(MAKE) machine-install-stackdriver-agent
 	$(MAKE) machine-add-grpc-server-tag
@@ -42,14 +41,11 @@ machine-rm:
 machine-ssh:
 	docker-machine ssh selfpass01
 
-machine-put-redis.conf:
-	docker-machine scp ./redis.conf selfpass01:redis.conf
-
 machine-put-data:
-	docker-machine scp ./data/appendonly.aof selfpass01:data/
+	docker-machine scp ./data/bolt.db selfpass01:data
 
 machine-get-data:
-	docker-machine scp selfpass01:data/appendonly.aof ./data/
+	docker-machine scp selfpass01:data/bolt.db ./data
 
 machine-add-grpc-server-tag:
 	gcloud compute instances add-tags selfpass01 \

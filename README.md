@@ -6,8 +6,8 @@ remotely through encrypted transportation. All of which is deployable locally or
 platforms such as GCP and AWS.
 
 It is still currently in development. However, the server is already capable of serving a gRPC
-based API using mutual TLS encryption, backed by Redis and Docker. It is also capable of being
-deployed in a semi-automated fashion locally and to GCP thanks to Docker.
+based API using mutual TLS encryption, backed by BoltDB. It is also capable
+of being deployed in a semi-automated fashion locally and to GCP thanks to Docker.
 
 **Server Roadmap**
 
@@ -64,6 +64,6 @@ using GUIs, with all the same safety and encryption as the CLI.
 - Go-Kit: services
 - gRPC/Protobuf: all
 - Cobra Commander & Viper Config: sp
-- Redis: services
+- BoltDB/Redis: services
 - Docker: services
 - Debian: docker images & machines

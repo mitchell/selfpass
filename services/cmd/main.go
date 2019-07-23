@@ -57,7 +57,7 @@ func main() {
 		},
 	})
 
-	db, err := repositories.NewRedisConn("tcp", "redis:6379", 2)
+	db, err := repositories.OpenBoltDB("/home/selfpass/data/bolt.db", 0600, nil)
 	check(err)
 
 	var svc types.Service

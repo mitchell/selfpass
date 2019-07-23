@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/etcd-io/bbolt"
 	"github.com/mediocregopher/radix/v3"
 	"github.com/spf13/pflag"
+	"go.etcd.io/bbolt"
 
 	"github.com/mitchell/selfpass/services/credentials/types"
 	"github.com/mitchell/selfpass/services/migrations/migration"
