@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/transport"
 	"github.com/go-kit/kit/transport/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,31 +21,31 @@ func NewGRPCServer(svc types.Service, logger log.Logger) GRPCServer {
 			endpoints.MakeGetAllMetadataEndpoint(svc),
 			decodeSourceHostRequest,
 			encodeMetadataStreamResponse,
-			grpc.ServerErrorLogger(logger),
+			grpc.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		),
 		get: grpc.NewServer(
 			endpoints.MakeGetEndpoint(svc),
 			decodeIdRequest,
 			encodeCredentialResponse,
-			grpc.ServerErrorLogger(logger),
+			grpc.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		),
 		create: grpc.NewServer(
 			endpoints.MakeCreateEndpoint(svc),
 			decodeCredentialRequest,
 			encodeCredentialResponse,
-			grpc.ServerErrorLogger(logger),
+			grpc.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		),
 		update: grpc.NewServer(
 			endpoints.MakeUpdateEndpoint(svc),
 			decodeUpdateRequest,
 			encodeCredentialResponse,
-			grpc.ServerErrorLogger(logger),
+			grpc.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		),
 		delete: grpc.NewServer(
 			endpoints.MakeDeleteEndpoint(svc),
 			decodeIdRequest,
 			noOp,
-			grpc.ServerErrorLogger(logger),
+			grpc.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		),
 	}
 }
@@ -58,13 +59,12 @@ type GRPCServer struct {
 }
 
 func (s GRPCServer) GetAllMetadata(r *protobuf.SourceHostRequest, srv protobuf.Credentials_GetAllMetadataServer) (err error) {
-	defer func() { err = handlerGRPCError(err) }()
-
 	var i interface{}
 	ctx := srv.Context()
 
 	ctx, i, err = s.getAllMetadata.ServeGRPC(ctx, *r)
 	if err != nil {
+		err = handlerGRPCError(err)
 		return err
 	}
 
@@ -74,14 +74,19 @@ receiveLoop:
 	for {
 		select {
 		case <-ctx.Done():
+			err = ctx.Err()
 			break receiveLoop
 		case err = <-mds.Errors:
-			break receiveLoop
+			if err != nil {
+				err = handlerGRPCError(err)
+				break receiveLoop
+			}
 		case md, ok := <-mds.Metadata:
 			if !ok {
 				break receiveLoop
 			}
 			if err = srv.Send(&md); err != nil {
+				err = handlerGRPCError(err)
 				break receiveLoop
 			}
 		}

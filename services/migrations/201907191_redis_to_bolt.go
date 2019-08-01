@@ -18,7 +18,7 @@ const keyCredentials = "credentials"
 
 func main() {
 	redisHost := pflag.StringP("redis-host", "r", "127.0.0.1:6379", "specify the redis host")
-	boltFile := pflag.StringP("bolt-file", "b", "./data/bolt.db", "specify the bolt DB file")
+	boltFile := pflag.StringP("bolt-file", "f", "./data/bolt.db", "specify the bolt DB file")
 	help := pflag.BoolP("help", "h", false, "see help")
 	pflag.Parse()
 
