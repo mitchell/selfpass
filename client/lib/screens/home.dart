@@ -106,8 +106,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   ) {
     final Map<String, List<Metadata>> metaMap = {};
 
-    metadatas.sort((a, b) => a.id.compareTo(b.id));
-
     for (var metadata in metadatas) {
       final source = metadata.sourceHost;
 
