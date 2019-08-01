@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -13,7 +12,7 @@ import (
 )
 
 func makeList(initClient CredentialsClientInit) *cobra.Command {
-	var sourceHost string
+	flags := credentialFlagSet{}.withHostFlag()
 
 	listCmd := &cobra.Command{
 		Use:   "list",
@@ -22,11 +21,16 @@ func makeList(initClient CredentialsClientInit) *cobra.Command {
 includes almost all the information but the most sensitive.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
-			mdch, errch := initClient(ctx).GetAllMetadata(ctx, sourceHost)
-			mds := map[string][]types.Metadata{}
+			client := initClient(ctx)
+
+			ctx, cancel = context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+
+			mdch, errch := client.GetAllMetadata(ctx, flags.sourceHost)
+			var mds []types.Metadata
 
 			fmt.Println()
 
@@ -44,38 +48,48 @@ includes almost all the information but the most sensitive.`,
 						break receive
 					}
 
-					mds[md.SourceHost] = append(mds[md.SourceHost], md)
+					mds = append(mds, md)
 				}
 			}
 
-			sources := []string{}
-			for source := range mds {
-				sources = append(sources, source)
+			var sources []string
+			mdmap := map[string][]types.Metadata{}
+			for _, md := range mds {
+				tmds := mdmap[md.SourceHost]
+
+				if tmds == nil {
+					mdmap[md.SourceHost] = []types.Metadata{md}
+					sources = append(sources, md.SourceHost)
+					continue
+				}
+
+				mdmap[md.SourceHost] = append(mdmap[md.SourceHost], md)
 			}
 
-			sort.Strings(sources)
+			if flags.sourceHost == "" {
+				prompt := &survey.Select{
+					Message:  "Source host:",
+					Options:  sources,
+					PageSize: 20,
+					VimMode:  true,
+				}
 
-			prompt := &survey.Select{
-				Message:  "Source host:",
-				Options:  sources,
-				PageSize: 20,
-				VimMode:  true,
+				check(survey.AskOne(prompt, &flags.sourceHost, nil))
 			}
 
-			var source string
-			check(survey.AskOne(prompt, &source, nil))
+			if len(mdmap[flags.sourceHost]) == 0 {
+				check(errSourceNotFound)
+			}
 
-			sort.Slice(mds[source], func(i, j int) bool {
-				return mds[source][i].Primary < mds[source][j].Primary
-			})
-
-			for _, md := range mds[source] {
+			for _, md := range mdmap[flags.sourceHost] {
 				fmt.Println(md)
 			}
 
 			fmt.Println("Done listing.")
 		},
 	}
+
+	flags.register(listCmd)
 
 	return listCmd
 }

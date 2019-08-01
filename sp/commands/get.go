@@ -16,6 +16,8 @@ import (
 )
 
 func makeGet(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
+	flags := credentialFlagSet{}.withHostFlag()
+
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a credential info and copy password to clipboard",
@@ -29,14 +31,14 @@ decrypting password.`,
 				prompt   survey.Prompt
 			)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
 			client := initClient(ctx)
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
 
-			cred := selectCredential(client)
+			cred := selectCredential(client, flags.sourceHost)
 
 			fmt.Println(cred)
 
@@ -89,6 +91,8 @@ decrypting password.`,
 			}
 		},
 	}
+
+	flags.register(getCmd)
 
 	return getCmd
 }

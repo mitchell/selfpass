@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	"github.com/mitchell/selfpass/sp/repositories"
 	"github.com/mitchell/selfpass/sp/types"
 )
 
@@ -31,6 +32,9 @@ the users private key, and server certificates. (All of which will be encrypted)
 				privateKey  = strings.Replace(uuid.New().String(), "-", "", -1)
 			)
 			_, cfg, err := repo.OpenConfig()
+			if err == repositories.ErrNoConfigFound {
+				err = nil
+			}
 			check(err)
 
 			prompt = &survey.Password{Message: "New master password:"}

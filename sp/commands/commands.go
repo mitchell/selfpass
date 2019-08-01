@@ -2,17 +2,52 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
-	"sort"
 	"time"
 
+	"github.com/spf13/cobra"
 	"gopkg.in/AlecAivazis/survey.v1"
 
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
 type CredentialsClientInit func(ctx context.Context) (c types.CredentialsClient)
+
+var errSourceNotFound = errors.New("source host not found")
+
+type credentialFlagSet struct {
+	includePasswordFlags bool
+	includeHostFlag      bool
+
+	sourceHost string
+	noNumbers  bool
+	noSpecials bool
+	length     uint
+}
+
+func (set credentialFlagSet) withPasswordFlags() credentialFlagSet {
+	set.includePasswordFlags = true
+	return set
+}
+
+func (set credentialFlagSet) withHostFlag() credentialFlagSet {
+	set.includeHostFlag = true
+	return set
+}
+
+func (set *credentialFlagSet) register(cmd *cobra.Command) {
+	if set.includeHostFlag {
+		cmd.Flags().StringVarP(&set.sourceHost, "source-host", "s", "", "filter results to this source host")
+	}
+
+	if set.includePasswordFlags {
+		cmd.Flags().BoolVarP(&set.noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
+		cmd.Flags().BoolVarP(&set.noSpecials, "no-specials", "p", false, "do not use special characters in the generated password")
+		cmd.Flags().UintVarP(&set.length, "length", "l", 32, "length of the generated password")
+	}
+}
 
 func check(err error) {
 	if err != nil {
@@ -21,18 +56,17 @@ func check(err error) {
 	}
 }
 
-func selectCredential(client types.CredentialsClient) types.Credential {
+func selectCredential(client types.CredentialsClient, sourceHost string) types.Credential {
 	var (
 		idKey  string
-		source string
 		prompt survey.Prompt
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	mdch, errch := client.GetAllMetadata(ctx, "")
-	mds := map[string][]types.Metadata{}
+	mdch, errch := client.GetAllMetadata(ctx, sourceHost)
+	var mds []types.Metadata
 
 	fmt.Println()
 
@@ -50,29 +84,42 @@ receive:
 				break receive
 			}
 
-			mds[md.SourceHost] = append(mds[md.SourceHost], md)
+			mds = append(mds, md)
 		}
 	}
 
-	sources := []string{}
-	for source := range mds {
-		sources = append(sources, source)
+	var sources []string
+	mdmap := map[string][]types.Metadata{}
+	for _, md := range mds {
+		tmds := mdmap[md.SourceHost]
+
+		if tmds == nil {
+			mdmap[md.SourceHost] = []types.Metadata{md}
+			sources = append(sources, md.SourceHost)
+			continue
+		}
+
+		mdmap[md.SourceHost] = append(mdmap[md.SourceHost], md)
 	}
 
-	sort.Strings(sources)
+	if sourceHost == "" {
+		prompt = &survey.Select{
+			Message:  "Source host:",
+			Options:  sources,
+			PageSize: 20,
+			VimMode:  true,
+		}
 
-	prompt = &survey.Select{
-		Message:  "Source host:",
-		Options:  sources,
-		PageSize: 20,
-		VimMode:  true,
+		check(survey.AskOne(prompt, &sourceHost, nil))
 	}
 
-	check(survey.AskOne(prompt, &source, nil))
+	if len(mdmap[sourceHost]) == 0 {
+		check(errSourceNotFound)
+	}
 
 	keys := []string{}
 	keyIDMap := map[string]string{}
-	for _, md := range mds[source] {
+	for _, md := range mdmap[sourceHost] {
 		key := md.Primary
 		if md.Tag != "" {
 			key += "-" + md.Tag
@@ -80,8 +127,6 @@ receive:
 		keys = append(keys, key)
 		keyIDMap[key] = md.ID
 	}
-
-	sort.Strings(keys)
 
 	prompt = &survey.Select{
 		Message:  "Primary user key (and tag):",

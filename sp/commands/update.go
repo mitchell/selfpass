@@ -18,9 +18,7 @@ import (
 )
 
 func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
-	var length uint
-	var noNumbers bool
-	var noSpecials bool
+	flags := credentialFlagSet{}.withHostFlag().withPasswordFlags()
 
 	updateCmd := &cobra.Command{
 		Use:   "update",
@@ -40,12 +38,12 @@ password.`,
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
 			client := initClient(ctx)
 
-			cred := selectCredential(client)
+			cred := selectCredential(client, flags.sourceHost)
 
 			mdqs := []*survey.Question{
 				{
@@ -111,7 +109,7 @@ password.`,
 				check(survey.AskOne(prompt, &randpass, nil))
 
 				if randpass {
-					ci.Password = crypto.GeneratePassword(int(length), !noNumbers, !noSpecials)
+					ci.Password = crypto.GeneratePassword(int(flags.length), !flags.noNumbers, !flags.noSpecials)
 
 					var copypass bool
 					prompt = &survey.Confirm{Message: "Copy new pass to clipboard?", Default: true}
@@ -182,9 +180,7 @@ password.`,
 		},
 	}
 
-	updateCmd.Flags().BoolVarP(&noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
-	updateCmd.Flags().BoolVarP(&noSpecials, "no-specials", "s", false, "do not use special characters in the generated password")
-	updateCmd.Flags().UintVarP(&length, "length", "l", 32, "length of the generated password")
+	flags.register(updateCmd)
 
 	return updateCmd
 }

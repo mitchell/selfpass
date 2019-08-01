@@ -18,9 +18,7 @@ import (
 )
 
 func makeCreate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
-	var length uint
-	var noNumbers bool
-	var noSpecials bool
+	flags := credentialFlagSet{}.withPasswordFlags()
 
 	createCmd := &cobra.Command{
 		Use:   "create",
@@ -77,7 +75,7 @@ password.`,
 			check(survey.AskOne(prompt, &newpass, nil))
 
 			if newpass {
-				ci.Password = crypto.GeneratePassword(int(length), !noNumbers, !noSpecials)
+				ci.Password = crypto.GeneratePassword(int(flags.length), !flags.noNumbers, !flags.noSpecials)
 
 				var copypass bool
 				prompt = &survey.Confirm{Message: "Copy new pass to clipboard?", Default: true}
@@ -130,10 +128,15 @@ password.`,
 				}
 			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*25)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
-			c, err := initClient(ctx).Create(ctx, ci)
+			client := initClient(ctx)
+
+			ctx, cancel = context.WithTimeout(context.Background(), time.Second*25)
+			defer cancel()
+
+			c, err := client.Create(ctx, ci)
 			check(err)
 
 			fmt.Println(c)
@@ -147,9 +150,7 @@ password.`,
 		},
 	}
 
-	createCmd.Flags().BoolVarP(&noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
-	createCmd.Flags().BoolVarP(&noSpecials, "no-specials", "s", false, "do not use special characters in the generated password")
-	createCmd.Flags().UintVarP(&length, "length", "l", 32, "length of the generated password")
+	flags.register(createCmd)
 
 	return createCmd
 }

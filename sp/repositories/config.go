@@ -16,6 +16,8 @@ import (
 	"github.com/mitchell/selfpass/sp/types"
 )
 
+var ErrNoConfigFound = errors.New("no config found, run 'init' command")
+
 func NewConfigManager(cfgFile *string) *ConfigManager {
 	return &ConfigManager{
 		cfgFile: cfgFile,
@@ -57,7 +59,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	var configDecrypted bool
 
 	if _, err := os.Open(cfg); os.IsNotExist(err) {
-		return output, mgr.v, fmt.Errorf("no config found, run 'init' command")
+		return output, mgr.v, ErrNoConfigFound
 	}
 
 	prompt := &survey.Password{Message: "Master password:"}
