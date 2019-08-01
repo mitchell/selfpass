@@ -42,10 +42,12 @@ machine-ssh:
 	docker-machine ssh selfpass01
 
 machine-put-data:
-	docker-machine scp ./data/bolt.db selfpass01:data
+	docker-machine ssh selfpass01 "if [[ ! -e data ]]; then mkdir data && chmod 777 data; fi"
+	docker-machine scp ./data/bolt.db selfpass01:data/bolt.db
+	docker-machine ssh selfpass01 "chmod 666 data/bolt.db"
 
 machine-get-data:
-	docker-machine scp selfpass01:data/bolt.db ./data
+	docker-machine scp selfpass01:data/bolt.db ./data/
 
 machine-add-grpc-server-tag:
 	gcloud compute instances add-tags selfpass01 \
