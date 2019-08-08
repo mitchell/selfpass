@@ -1,7 +1,15 @@
 version: "3.7"
 services:
   server:
+    image: mjfs/selfpass:latest
     entrypoint:
       - server
     volumes:
       - "/home/selfpass/data:/home/selfpass/data"
+secrets:
+  ca:
+    file: "/home/selfpass/certs/ca.pem"
+  cert:
+    file: "/home/selfpass/certs/server.pem"
+  key:
+    file: "/home/selfpass/certs/server-key.pem"

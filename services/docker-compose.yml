@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   server:
-    build: .
+    image: selfpass:latest
     restart: on-failure
     entrypoint:
       - server
@@ -10,3 +10,14 @@ services:
       - "8080:8080"
     volumes:
       - "./data:/home/selfpass/data"
+    secrets:
+      - ca
+      - cert
+      - key
+secrets:
+  ca:
+    file: "./certs/ca.pem"
+  cert:
+    file: "./certs/server.pem"
+  key:
+    file: "./certs/server-key.pem"

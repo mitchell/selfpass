@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"flag"
 	"io"
+	"io/ioutil"
 	stdlog "log"
 	"net"
 	"os"
@@ -31,6 +32,9 @@ func main() {
 		jsonLogs = flag.Bool("json-logs", false, "enables json logging")
 		port     = flag.String("port", "8080", "specify the port to listen on")
 		verbose  = flag.Bool("v", false, "be more verbose")
+		caFile   = flag.String("ca", "/run/secrets/ca", "specify an alternate ca file")
+		certFile = flag.String("cert", "/run/secrets/cert", "specify an alternate cert file")
+		keyFile  = flag.String("key", "/run/secrets/key", "specify an alternate key file")
 	)
 	flag.Parse()
 
@@ -40,11 +44,18 @@ func main() {
 
 	logger = newLogger(os.Stdout, *jsonLogs)
 
-	keypair, err := tls.X509KeyPair([]byte(cert), []byte(key))
+	ca, err := ioutil.ReadFile(*caFile)
+	check(err)
+	cert, err := ioutil.ReadFile(*certFile)
+	check(err)
+	key, err := ioutil.ReadFile(*keyFile)
+	check(err)
+
+	keypair, err := tls.X509KeyPair(cert, key)
 	check(err)
 
 	caPool := x509.NewCertPool()
-	caPool.AppendCertsFromPEM([]byte(ca))
+	caPool.AppendCertsFromPEM(ca)
 
 	creds := credentials.NewTLS(&tls.Config{
 		Certificates:             []tls.Certificate{keypair},
