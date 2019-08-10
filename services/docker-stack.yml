@@ -2,9 +2,6 @@ version: "3.7"
 services:
   server:
     image: mjfs/selfpass:latest
-    entrypoint:
-      - server
-      - -v
     ports:
       - "8080:8080"
     volumes:
