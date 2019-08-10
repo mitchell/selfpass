@@ -9,14 +9,14 @@ build:
 clean:
 	rm -rf ./bin ./vendor
 
-local:
-	docker-compose up -d
+deploy:
+	docker stack deploy -c docker-stack.yml selfpass
 
 up:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+	docker-compose up
 
 upd:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+	docker-compose up -d
 
 down:
 	docker-compose down

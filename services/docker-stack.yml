@@ -1,0 +1,32 @@
+version: "3.7"
+services:
+  server:
+    image: mjfs/selfpass:latest
+    entrypoint:
+      - server
+      - -v
+    ports:
+      - "8080:8080"
+    volumes:
+      - data:/home/selfpass/data
+    secrets:
+      - ca
+      - cert
+      - key
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+secrets:
+  ca:
+    external: true
+  cert:
+    external: true
+  key:
+    external: true
+
+volumes:
+  data:
+    external: true
