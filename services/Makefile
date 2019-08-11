@@ -25,10 +25,10 @@ machine-create-google:
 	docker-machine create --driver google \
 	    --google-address selfpass \
 	    --google-project selfpass-241808 \
-	    --google-machine-type g1-small \
+	    --google-machine-type f1-micro \
 	    --google-machine-image https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-9-stretch-v20190514 \
 	    --google-username selfpass \
-	    --google-zone us-west1-c \
+	    --google-zone us-east4-c \
 	    ${DOCKER_MACHINE_NAME}
 	$(MAKE) machine-install-stackdriver-agent
 	$(MAKE) machine-add-grpc-server-tag
@@ -56,7 +56,7 @@ machine-put-certs:
 
 machine-add-grpc-server-tag:
 	gcloud compute instances add-tags ${DOCKER_MACHINE_NAME} \
-		--zone us-west1-c \
+		--zone us-east4-c \
 		--tags grpc-server
 
 machine-install-stackdriver-agent:
