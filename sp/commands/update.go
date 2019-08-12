@@ -17,7 +17,7 @@ import (
 	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func makeUpdate(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
+func makeUpdate(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.Command {
 	flags := credentialFlagSet{}.withHostFlag().withPasswordFlags()
 
 	updateCmd := &cobra.Command{
@@ -143,7 +143,7 @@ password.`,
 
 			if otp {
 				var secret string
-				prompt := &survey.Password{Message: "OTP secret:"}
+				prompt = &survey.Password{Message: "OTP secret:"}
 				check(survey.AskOne(prompt, &secret, nil))
 
 				ciphersecret, err := crypto.CBCEncrypt(keypass, []byte(secret))
@@ -152,14 +152,24 @@ password.`,
 				ci.OTPSecret = base64.StdEncoding.EncodeToString(ciphersecret)
 
 				var copyotp bool
-				prompt2 := &survey.Confirm{Message: "Copy new OTP to clipboard?", Default: true}
-				check(survey.AskOne(prompt2, &copyotp, nil))
+				prompt = &survey.Confirm{Message: "Copy new OTP to clipboard?", Default: true}
+				check(survey.AskOne(prompt, &copyotp, nil))
 
 				if copyotp {
 					otp, err := totp.GenerateCode(secret, time.Now())
 					check(err)
 
 					check(clipboard.WriteAll(otp))
+
+					prompt = &survey.Confirm{Message: "Anotha one?", Default: true}
+					check(survey.AskOne(prompt, &copyotp, nil))
+
+					if copyotp {
+						otp, err := totp.GenerateCode(secret, time.Now().Add(time.Second*30))
+						check(err)
+
+						check(clipboard.WriteAll(otp))
+					}
 				}
 			}
 

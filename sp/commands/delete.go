@@ -9,7 +9,7 @@ import (
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
-func makeDelete(initClient CredentialsClientInit) *cobra.Command {
+func makeDelete(initClient credentialsClientInit) *cobra.Command {
 	flags := credentialFlagSet{}.withHostFlag()
 
 	deleteCmd := &cobra.Command{

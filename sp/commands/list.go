@@ -11,7 +11,7 @@ import (
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-func makeList(initClient CredentialsClientInit) *cobra.Command {
+func makeList(initClient credentialsClientInit) *cobra.Command {
 	flags := credentialFlagSet{}.withHostFlag()
 
 	listCmd := &cobra.Command{

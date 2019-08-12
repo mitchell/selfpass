@@ -11,6 +11,7 @@ import (
 	"github.com/mitchell/selfpass/sp/types"
 )
 
+// Execute is the main entrypoint for the `sp` CLI tool.
 func Execute() {
 	rootCmd := &cobra.Command{
 		Use:   "sp",
@@ -41,7 +42,7 @@ can interact with the entire Selfpass API.`,
 	check(rootCmd.Execute())
 }
 
-func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialsClientInit) CredentialsClientInit {
+func makeInitClient(repo types.ConfigRepo, initClient credtypes.CredentialsClientInit) credentialsClientInit {
 	return func(ctx context.Context) credtypes.CredentialsClient {
 		_, cfg, err := repo.OpenConfig()
 		check(err)

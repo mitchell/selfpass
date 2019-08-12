@@ -14,7 +14,7 @@ import (
 	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func makeGCMToCBC(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
+func makeGCMToCBC(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.Command {
 	gcmToCBC := &cobra.Command{
 		Use:    "gcm-to-cbc",
 		Hidden: true,

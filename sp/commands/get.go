@@ -15,7 +15,7 @@ import (
 	clitypes "github.com/mitchell/selfpass/sp/types"
 )
 
-func makeGet(repo clitypes.ConfigRepo, initClient CredentialsClientInit) *cobra.Command {
+func makeGet(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.Command {
 	flags := credentialFlagSet{}.withHostFlag()
 
 	getCmd := &cobra.Command{

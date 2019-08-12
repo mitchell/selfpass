@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/atotto/clipboard v0.1.2
-	github.com/davecgh/go-spew v1.1.1
 	github.com/google/uuid v1.1.1
 	github.com/mitchell/selfpass/services v0.0.0-00010101000000-000000000000
 	github.com/mitchellh/go-homedir v1.1.0

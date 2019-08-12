@@ -13,7 +13,7 @@ import (
 	"github.com/mitchell/selfpass/services/credentials/types"
 )
 
-type CredentialsClientInit func(ctx context.Context) (c types.CredentialsClient)
+type credentialsClientInit func(ctx context.Context) (c types.CredentialsClient)
 
 var errSourceNotFound = errors.New("source host not found")
 
