@@ -6,3 +6,4 @@ data
 *.tar
 *.enc
 vendor
+.vscode
