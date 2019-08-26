@@ -105,7 +105,7 @@ password.`,
 
 			if newpass {
 				var randpass bool
-				prompt = &survey.Confirm{Message: "Do you want a random password?", Default: true}
+				prompt = &survey.Confirm{Message: "Generate a random password?", Default: true}
 				check(survey.AskOne(prompt, &randpass, nil))
 
 				if randpass {
@@ -181,7 +181,7 @@ password.`,
 
 			fmt.Println(c)
 
-			prompt = &survey.Confirm{Message: "Do you want to clear the clipboard?", Default: true}
+			prompt = &survey.Confirm{Message: "Clear the clipboard?", Default: true}
 			check(survey.AskOne(prompt, &cleancb, nil))
 
 			if cleancb {
