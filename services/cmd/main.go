@@ -28,18 +28,18 @@ var logger log.Logger
 
 func main() {
 	var (
-		stop     = make(chan os.Signal, 1)
+		verbose  = flag.Bool("v", false, "be more verbose")
 		jsonLogs = flag.Bool("json-logs", false, "enables json logging")
 		port     = flag.String("port", "8080", "specify the port to listen on")
-		verbose  = flag.Bool("v", false, "be more verbose")
 		caFile   = flag.String("ca", "/run/secrets/ca", "specify an alternate ca file")
 		certFile = flag.String("cert", "/run/secrets/cert", "specify an alternate cert file")
 		keyFile  = flag.String("key", "/run/secrets/key", "specify an alternate key file")
+		boltFile = flag.String("bolt-file", "/home/selfpass/data/bolt.db", "specify an alternate bolt db file")
 	)
 	flag.Parse()
 
+	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT)
-	signal.Notify(stop, syscall.SIGKILL)
 	signal.Notify(stop, syscall.SIGTERM)
 
 	logger = newLogger(os.Stdout, *jsonLogs)
@@ -68,7 +68,9 @@ func main() {
 		},
 	})
 
-	db, err := repositories.OpenBoltDB("/home/selfpass/data/bolt.db", 0600, nil)
+	srv := grpc.NewServer(grpc.Creds(creds))
+
+	db, err := repositories.OpenBoltDB(*boltFile, 0600, nil)
 	check(err)
 
 	var svc types.Service
@@ -78,7 +80,6 @@ func main() {
 	}
 
 	gsrv := transport.NewGRPCServer(svc, logger)
-	srv := grpc.NewServer(grpc.Creds(creds))
 	protobuf.RegisterCredentialsServer(srv, gsrv)
 
 	addr := ":" + *port
@@ -93,6 +94,7 @@ func main() {
 	go func() { check(srv.Serve(lis)) }()
 
 	<-stop
+
 	_ = logger.Log("message", "gracefully stopping")
 	srv.GracefulStop()
 }
