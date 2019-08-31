@@ -16,7 +16,7 @@ import (
 )
 
 func makeGet(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.Command {
-	flags := credentialFlagSet{}.withHostFlag()
+	flags := credentialFlagSet{}.withCredFlags()
 
 	getCmd := &cobra.Command{
 		Use:   "get",
@@ -25,6 +25,8 @@ func makeGet(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.
 decrypting password.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			defer flags.resetValues()
+
 			var (
 				copyPass bool
 				cleancb  bool
@@ -38,7 +40,7 @@ decrypting password.`,
 			masterpass, cfg, err := repo.OpenConfig()
 			check(err)
 
-			cred := selectCredential(client, flags.sourceHost)
+			cred := selectCredential(client, flags.sourceHost, flags.primary)
 
 			fmt.Println(cred)
 

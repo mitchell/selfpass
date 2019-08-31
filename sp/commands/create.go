@@ -27,6 +27,8 @@ func makeCreate(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cob
 password.`,
 
 		Run: func(_ *cobra.Command, args []string) {
+			defer flags.resetValues()
+
 			var (
 				otp     bool
 				cleancb bool

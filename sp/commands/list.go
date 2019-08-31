@@ -12,7 +12,7 @@ import (
 )
 
 func makeList(initClient credentialsClientInit) *cobra.Command {
-	flags := credentialFlagSet{}.withHostFlag()
+	flags := credentialFlagSet{}.withCredFlags()
 
 	listCmd := &cobra.Command{
 		Use:   "list",
@@ -21,6 +21,8 @@ func makeList(initClient credentialsClientInit) *cobra.Command {
 includes almost all the information but the most sensitive.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			defer flags.resetValues()
+
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 

@@ -10,7 +10,7 @@ import (
 )
 
 func makeDelete(initClient credentialsClientInit) *cobra.Command {
-	flags := credentialFlagSet{}.withHostFlag()
+	flags := credentialFlagSet{}.withCredFlags()
 
 	deleteCmd := &cobra.Command{
 		Use:   "delete",
@@ -18,12 +18,14 @@ func makeDelete(initClient credentialsClientInit) *cobra.Command {
 		Long:  `Delete a credential using the given ID, permanently. THERE IS NO UNDOING THIS ACTION.`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			defer flags.resetValues()
+
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 			defer cancel()
 
 			client := initClient(ctx)
 
-			cred := selectCredential(client, flags.sourceHost)
+			cred := selectCredential(client, flags.sourceHost, flags.primary)
 
 			fmt.Println(cred)
 

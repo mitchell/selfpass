@@ -18,7 +18,7 @@ import (
 )
 
 func makeUpdate(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cobra.Command {
-	flags := credentialFlagSet{}.withHostFlag().withPasswordFlags()
+	flags := credentialFlagSet{}.withCredFlags().withPasswordFlags()
 
 	updateCmd := &cobra.Command{
 		Use:   "update",
@@ -27,6 +27,8 @@ func makeUpdate(repo clitypes.ConfigRepo, initClient credentialsClientInit) *cob
 password.`,
 
 		Run: func(_ *cobra.Command, args []string) {
+			defer flags.resetValues()
+
 			var (
 				newpass bool
 				otp     bool
@@ -43,7 +45,7 @@ password.`,
 
 			client := initClient(ctx)
 
-			cred := selectCredential(client, flags.sourceHost)
+			cred := selectCredential(client, flags.sourceHost, flags.primary)
 
 			mdqs := []*survey.Question{
 				{

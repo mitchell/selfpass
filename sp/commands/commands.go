@@ -19,9 +19,10 @@ var errSourceNotFound = errors.New("source host not found")
 
 type credentialFlagSet struct {
 	includePasswordFlags bool
-	includeHostFlag      bool
+	includeCredFlags     bool
 
 	sourceHost string
+	primary    string
 	noNumbers  bool
 	noSpecials bool
 	length     uint
@@ -32,35 +33,47 @@ func (set credentialFlagSet) withPasswordFlags() credentialFlagSet {
 	return set
 }
 
-func (set credentialFlagSet) withHostFlag() credentialFlagSet {
-	set.includeHostFlag = true
+func (set credentialFlagSet) withCredFlags() credentialFlagSet {
+	set.includeCredFlags = true
 	return set
 }
 
 func (set *credentialFlagSet) register(cmd *cobra.Command) {
-	if set.includeHostFlag {
+	if set.includeCredFlags {
 		cmd.Flags().StringVarP(&set.sourceHost, "source-host", "s", "", "filter results to this source host")
+		cmd.Flags().StringVarP(&set.primary, "primary", "p", "", "specify a primary user key (must include tag if applicable)")
 	}
 
 	if set.includePasswordFlags {
 		cmd.Flags().BoolVarP(&set.noNumbers, "no-numbers", "n", false, "do not use numbers in the generated password")
-		cmd.Flags().BoolVarP(&set.noSpecials, "no-specials", "p", false, "do not use special characters in the generated password")
+		cmd.Flags().BoolVarP(&set.noSpecials, "no-specials", "e", false, "do not use special characters in the generated password")
 		cmd.Flags().UintVarP(&set.length, "length", "l", 32, "length of the generated password")
 	}
 }
 
+func (set *credentialFlagSet) resetValues() {
+	set.sourceHost = ""
+	set.primary = ""
+	set.noNumbers = false
+	set.noSpecials = false
+	set.length = 0
+}
+
+var checkPromptMode = false
+
 func check(err error) {
 	if err != nil {
-		fmt.Println(err)
+		if checkPromptMode {
+			panic(err)
+		}
+
+		fmt.Fprintln(os.Stdout, err)
 		os.Exit(1)
 	}
 }
 
-func selectCredential(client types.CredentialsClient, sourceHost string) types.Credential {
-	var (
-		idKey  string
-		prompt survey.Prompt
-	)
+func selectCredential(client types.CredentialsClient, sourceHost string, primary string) types.Credential {
+	var prompt survey.Prompt
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -128,19 +141,24 @@ receive:
 		keyIDMap[key] = md.ID
 	}
 
-	prompt = &survey.Select{
-		Message:  "Primary user key (and tag):",
-		Options:  keys,
-		PageSize: 20,
-		VimMode:  true,
-	}
+	if primary == "" {
+		var idKey string
+		prompt = &survey.Select{
+			Message:  "Primary user key (and tag):",
+			Options:  keys,
+			PageSize: 20,
+			VimMode:  true,
+		}
 
-	check(survey.AskOne(prompt, &idKey, nil))
+		check(survey.AskOne(prompt, &idKey, nil))
+
+		primary = idKey
+	}
 
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	cred, err := client.Get(ctx, keyIDMap[idKey])
+	cred, err := client.Get(ctx, keyIDMap[primary])
 	check(err)
 
 	return cred

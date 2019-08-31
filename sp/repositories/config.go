@@ -71,6 +71,7 @@ func (mgr *ConfigManager) OpenConfig() (output string, v *viper.Viper, err error
 	if err == errConfigDecrypted {
 		configDecrypted = true
 	} else if err != nil && err.Error() == crypto.ErrAuthenticationFailed.Error() {
+		mgr.masterpass = ""
 		return output, nil, errors.New("incorrect masterpass")
 	} else if err != nil {
 		return output, nil, err

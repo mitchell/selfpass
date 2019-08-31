@@ -19,10 +19,13 @@ import (
 func Execute() {
 	rootCmd := &cobra.Command{
 		Use:   "sp",
-		Run:   run,
+		Run:   runPromptMode,
 		Short: "This is the CLI client for Selfpass.",
 		Long: `This is the CLI client for Selfpass, the self-hosted password manager. With this tool you
-can interact with the entire Selfpass API.`,
+can interact with the entire Selfpass API.
+
+When run without a command specified sp enters prompt mode. All commands and flags are the same,
+but your master pass only need be entered once until you exit the prompt.`,
 		Version: "v0.1.0",
 	}
 
@@ -47,7 +50,7 @@ can interact with the entire Selfpass API.`,
 	check(rootCmd.Execute())
 }
 
-func run(cmd *cobra.Command, _ []string) {
+func runPromptMode(cmd *cobra.Command, _ []string) {
 	ss := []prompt.Suggest{
 		{Text: "exit", Description: "Exit selfpass prompt"},
 	}
@@ -67,6 +70,8 @@ func run(cmd *cobra.Command, _ []string) {
 		return prompt.FilterHasPrefix(ss, d.TextBeforeCursor(), true)
 	}
 
+	checkPromptMode = true
+
 	executor := func(argstr string) {
 		args := strings.Split(argstr, " ")
 
@@ -75,11 +80,15 @@ func run(cmd *cobra.Command, _ []string) {
 			os.Exit(0)
 		}
 
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Fprint(os.Stderr, err, "\n\n")
+			}
+		}()
+
 		cmd.SetArgs(args)
-		err := cmd.Execute()
-		if err != nil {
-			fmt.Println(err)
-		}
+		cmd.Execute()
+
 		fmt.Println()
 	}
 
@@ -98,6 +107,7 @@ func run(cmd *cobra.Command, _ []string) {
 		prompt.OptionPreviewSuggestionTextColor(prompt.Red),
 	)
 
+	fmt.Println("\nWelcome to the selfpass prompt.")
 	p.Run()
 }
 
