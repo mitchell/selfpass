@@ -117,6 +117,7 @@ password.`,
 
 					if copypass {
 						check(clipboard.WriteAll(ci.Password))
+						fmt.Println("Wrote one time password to clipboard.")
 					}
 				} else {
 					prompt := &survey.Password{Message: "Password: "}
@@ -160,6 +161,7 @@ password.`,
 					check(err)
 
 					check(clipboard.WriteAll(otp))
+					fmt.Println("Wrote one time password to clipboard.")
 
 					prompt = &survey.Confirm{Message: "Anotha one?", Default: true}
 					check(survey.AskOne(prompt, &copyotp, nil))
@@ -169,6 +171,7 @@ password.`,
 						check(err)
 
 						check(clipboard.WriteAll(otp))
+						fmt.Println("Wrote one time password to clipboard.")
 					}
 				}
 			}
@@ -186,6 +189,7 @@ password.`,
 
 			if cleancb {
 				check(clipboard.WriteAll(" "))
+				fmt.Println("Clipboard cleared.")
 			}
 		},
 	}

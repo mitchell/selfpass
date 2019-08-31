@@ -88,6 +88,7 @@ decrypting password.`,
 
 			if cleancb {
 				check(clipboard.WriteAll(" "))
+				fmt.Println("Clipboard cleared.")
 			}
 		},
 	}
