@@ -53,6 +53,10 @@ func run(cmd *cobra.Command, _ []string) {
 	}
 
 	for _, subcmd := range cmd.Commands() {
+		if subcmd.Hidden {
+			continue
+		}
+
 		ss = append(ss, prompt.Suggest{
 			Text:        subcmd.Name(),
 			Description: subcmd.Short,
@@ -82,10 +86,16 @@ func run(cmd *cobra.Command, _ []string) {
 	p := prompt.New(
 		executor,
 		completer,
-		prompt.OptionPrefix("selfpass-> "),
-		prompt.OptionPrefixTextColor(prompt.White),
+		prompt.OptionPrefix("-> "),
+		prompt.OptionPrefixTextColor(prompt.Green),
+		prompt.OptionInputTextColor(prompt.LightGray),
 		prompt.OptionSuggestionBGColor(prompt.DarkBlue),
 		prompt.OptionDescriptionBGColor(prompt.Blue),
+		prompt.OptionSelectedSuggestionBGColor(prompt.Blue),
+		prompt.OptionSelectedDescriptionBGColor(prompt.DarkBlue),
+		prompt.OptionScrollbarThumbColor(prompt.LightGray),
+		prompt.OptionScrollbarBGColor(prompt.DarkGray),
+		prompt.OptionPreviewSuggestionTextColor(prompt.Red),
 	)
 
 	p.Run()
