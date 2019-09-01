@@ -19,10 +19,12 @@ class TappableTextList extends StatelessWidget {
       widgets.add(GestureDetector(
         onTap: handleOnTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 15.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.5),
           decoration: const BoxDecoration(
             border: Border(
-              bottom: BorderSide(color: CupertinoColors.lightBackgroundGray),
+              bottom: BorderSide(
+                color: Color(0xFF1e1d1e),
+              ),
             ),
           ),
           child: Text(text, textAlign: TextAlign.center),

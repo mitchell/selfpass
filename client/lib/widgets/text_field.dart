@@ -34,8 +34,9 @@ class TextField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: CupertinoTextField(
+        style: TextStyle(color: CupertinoColors.darkBackgroundGray),
         decoration: BoxDecoration(
-          border: Border.all(color: CupertinoColors.black),
+          color: CupertinoColors.lightBackgroundGray,
           borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         ),
         clearButtonMode: clearButtonMode,

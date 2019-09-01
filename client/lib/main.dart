@@ -23,6 +23,18 @@ class Selfpass extends StatelessWidget {
       builder: (BuildContext context) => EncryptedSharedPreferences(),
       child: CupertinoApp(
         title: 'Selfpass',
+        theme: CupertinoThemeData(
+            textTheme: CupertinoTextThemeData(
+              brightness: Brightness.dark,
+              textStyle: TextStyle(
+                fontSize: 16,
+                color: CupertinoColors.lightBackgroundGray,
+              ),
+            ),
+            scaffoldBackgroundColor: CupertinoColors.darkBackgroundGray,
+            brightness: Brightness.dark,
+            primaryColor: CupertinoColors.activeBlue,
+            primaryContrastingColor: CupertinoColors.darkBackgroundGray),
         onGenerateRoute: (RouteSettings settings) {
           String title;
           WidgetBuilder builder;
