@@ -24,6 +24,7 @@ class TappableTextList extends StatelessWidget {
             border: Border(
               bottom: BorderSide(
                 color: Color(0xFF1e1d1e),
+                width: 2,
               ),
             ),
           ),

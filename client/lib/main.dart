@@ -27,8 +27,12 @@ class Selfpass extends StatelessWidget {
             textTheme: CupertinoTextThemeData(
               brightness: Brightness.dark,
               textStyle: TextStyle(
-                fontSize: 16,
+                inherit: false,
+                fontFamily: '.SF Pro Text',
+                fontSize: 17.0,
+                letterSpacing: -0.41,
                 color: CupertinoColors.lightBackgroundGray,
+                decoration: TextDecoration.none,
               ),
             ),
             scaffoldBackgroundColor: CupertinoColors.darkBackgroundGray,
