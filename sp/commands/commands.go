@@ -56,7 +56,7 @@ func (set *credentialFlagSet) resetValues() {
 	set.primary = ""
 	set.noNumbers = false
 	set.noSpecials = false
-	set.length = 0
+	set.length = 32
 }
 
 var checkPromptMode = false
