@@ -6,6 +6,7 @@ require (
 	github.com/atotto/clipboard v0.1.2
 	github.com/c-bata/go-prompt v0.2.3
 	github.com/google/uuid v1.1.1
+	github.com/mattn/go-tty v0.0.0-20190424173100-523744f04859 // indirect
 	github.com/mitchell/selfpass/services v0.0.0-00010101000000-000000000000
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/ncw/rclone v1.48.0

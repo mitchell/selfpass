@@ -12,5 +12,5 @@ const (
 )
 
 func GeneratePBKDF2Key(password, salt []byte) []byte {
-	return pbkdf2.Key([]byte(password), []byte(salt), PBKDF2Rounds, KeyLength, sha256.New)
+	return pbkdf2.Key(password, salt, PBKDF2Rounds, KeyLength, sha256.New)
 }

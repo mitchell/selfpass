@@ -111,20 +111,23 @@ password.`,
 			check(survey.AskOne(prompt, &otp, nil))
 
 			if otp {
+				var copyOTP bool
 				var secret string
+
 				prompt = &survey.Password{Message: "OTP secret:"}
 				check(survey.AskOne(prompt, &secret, nil))
 
-				ciphersecret, err := crypto.CBCEncrypt(keypass, []byte(secret))
-				check(err)
+				if secret != "" {
+					ciphersecret, err := crypto.CBCEncrypt(keypass, []byte(secret))
+					check(err)
 
-				ci.OTPSecret = base64.StdEncoding.EncodeToString(ciphersecret)
+					ci.OTPSecret = base64.StdEncoding.EncodeToString(ciphersecret)
 
-				var copyotp bool
-				prompt = &survey.Confirm{Message: "Copy new OTP to clipboard?", Default: true}
-				check(survey.AskOne(prompt, &copyotp, nil))
+					prompt = &survey.Confirm{Message: "Copy new OTP to clipboard?", Default: true}
+					check(survey.AskOne(prompt, &copyOTP, nil))
+				}
 
-				if copyotp {
+				if copyOTP {
 					otp, err := totp.GenerateCode(secret, time.Now())
 					check(err)
 
@@ -132,9 +135,9 @@ password.`,
 					fmt.Println("Wrote one time password to clipboard.")
 
 					prompt = &survey.Confirm{Message: "Anotha one?", Default: true}
-					check(survey.AskOne(prompt, &copyotp, nil))
+					check(survey.AskOne(prompt, &copyOTP, nil))
 
-					if copyotp {
+					if copyOTP {
 						otp, err := totp.GenerateCode(secret, time.Now().Add(time.Second*30))
 						check(err)
 

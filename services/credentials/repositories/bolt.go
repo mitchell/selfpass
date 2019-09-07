@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"os"
-	"sync"
 
 	"go.etcd.io/bbolt"
 
@@ -38,23 +37,18 @@ func (db BoltDB) GetAllMetadata(ctx context.Context, sourceHost string, errch ch
 				return nil
 			}
 
-			var wg sync.WaitGroup
 			c := bkt.hostPrimaryIndex.Cursor()
 
 			if sourceHost == "" {
 				for key, value := c.First(); key != nil; key, value = c.Next() {
-					wg.Add(1)
-					unmarshalAndSendCred(value, mdch, errch, &wg)
+					unmarshalAndSendCred(value, mdch, errch)
 				}
 			} else {
 				hostBytes := []byte(sourceHost)
 				for key, value := c.Seek(hostBytes); bytes.HasPrefix(key, hostBytes); key, value = c.Next() {
-					wg.Add(1)
-					unmarshalAndSendCred(value, mdch, errch, &wg)
+					unmarshalAndSendCred(value, mdch, errch)
 				}
 			}
-
-			wg.Wait()
 
 			return nil
 		})
@@ -67,9 +61,7 @@ func (db BoltDB) GetAllMetadata(ctx context.Context, sourceHost string, errch ch
 	return mdch
 }
 
-func unmarshalAndSendCred(value []byte, mdch chan<- types.Metadata, errch chan<- error, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func unmarshalAndSendCred(value []byte, mdch chan<- types.Metadata, errch chan<- error) {
 	var cred types.Credential
 
 	err := gobUnmarshal(value, &cred)
