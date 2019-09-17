@@ -141,6 +141,11 @@ receive:
 		keyIDMap[key] = md.ID
 	}
 
+	if len(keys) == 1 {
+		primary = keys[0]
+		fmt.Printf("Selecting sole credential for this source.\n\n")
+	}
+
 	if primary == "" {
 		var idKey string
 		prompt = &survey.Select{
