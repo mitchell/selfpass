@@ -1,4 +1,4 @@
-FROM golang:1.12 as build
+FROM golang:1.13 as build
 WORKDIR /go/src/github.com/mitchell/selfpass/services
 COPY . .
 ENV GO111MODULE on

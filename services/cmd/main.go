@@ -61,7 +61,7 @@ func main() {
 		Certificates:             []tls.Certificate{keypair},
 		ClientCAs:                caPool,
 		ClientAuth:               tls.RequireAndVerifyClientCert,
-		MinVersion:               tls.VersionTLS12,
+		MinVersion:               tls.VersionTLS13,
 		PreferServerCipherSuites: true,
 		CurvePreferences: []tls.CurveID{
 			tls.CurveP256,
