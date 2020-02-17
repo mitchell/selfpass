@@ -18,12 +18,15 @@ services:
 
 secrets:
   ca:
-    external: true
+    file: ./certs/ca.pem
   cert:
-    external: true
+    file: ./certs/server.pem
   key:
-    external: true
+    file: ./certs/server-key.pem
 
 volumes:
   data:
-    external: true
+    driver: local
+    driver_opts:
+      type: "ext4"
+      device: "/dev/sdb1"
